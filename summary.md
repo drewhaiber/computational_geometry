@@ -23,10 +23,10 @@ Berlin, Heidelberg, Springer Berlin Heidelberg, 2008.
 | ------- | --------------------------------------------------------------- |
 | Week 5  | Research and learn the algorithms.                              |
 | Week 6  | Implement the 2D algorithm in Javascript or Typescript.         |
-| Week 7  | Learn PaperJS and reasearch 2D web graphics.                    |
+| Week 7  | Learn PaperJS and research 2D web graphics.                     |
 | Week 8  | Create a visual output for the algorithm.                       |
 | Week 9  | Add buttons to step through the algorithm one action at a time. |
-| Week 10 | Make psudocode that follows along with the algorithm.           |
+| Week 10 | Make pseudocode that follows along with the algorithm.          |
 | Week 11 | Write background information and relavent paragraphs.           |
 | Week 12 | Refine project and thoroughly test.                             |
 | Week 13 | If time remains, add a 3D implementation.                       |
