@@ -1,0 +1,7 @@
+{
+  "name": "computational_geometry",
+  "packageManager": "yarn@3.2.3",
+  "devDependencies": {
+    "typescript": "^4.8.3"
+  }
+}
