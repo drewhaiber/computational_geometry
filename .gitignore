@@ -1,3 +1,5 @@
+.delaunay-triangulation.js
+
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
