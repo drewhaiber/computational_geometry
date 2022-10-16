@@ -21,6 +21,9 @@ class Point:
     def __str__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
+    def __eq__(self, other):
+        return (self.x == other.x) and (self.y == other.y)
+
     def mag(self):
         return math.sqrt((self.x ** 2) + (self.y ** 2))
 
@@ -40,13 +43,27 @@ class Triangle:
         self.p2 = p2
         self.p3 = p3
 
+    def __eq__(self, other):
+        return (self.p1 == other.p1 and self.p2 == other.p2 and self.p3 == other.p3) or \
+               (self.p1 == other.p2 and self.p2 == other.p3 and self.p3 == other.p1) or \
+               (self.p1 == other.p3 and self.p2 == other.p1 and self.p3 == other.p2) or \
+               (self.p1 == other.p1 and self.p2 == other.p3 and self.p3 == other.p2) or \
+               (self.p1 == other.p2 and self.p2 == other.p1 and self.p3 == other.p3) or \
+               (self.p1 == other.p3 and self.p2 == other.p2 and self.p3 == other.p1)
+                #There's gotta be a better way of doing this but I don't know how
+
+    def has_common_vertex(self, other):
+        return (self.p1 == other.p1 or self.p1 == other.p2 or self.p1 == other.p3) or \
+                (self.p2 == other.p1 or self.p2 == other.p2 or self.p2 == other.p3) or \
+                (self.p3 == other.p1 or self.p3 == other.p2 or self.p3 == other.p3)
+
     def plot_triangle(self):
         plt.plot((self.p1.x, self.p2.x), (self.p1.y, self.p2.y))
         plt.plot((self.p2.x, self.p3.x), (self.p2.y, self.p3.y))
         plt.plot((self.p1.x, self.p3.x), (self.p1.y, self.p3.y))
 
     def get_edges(self):
-        return ((self.p1, self.p2), (self.p2, self.p3), (self.p3, self.p1))
+        return (self.p1, self.p2), (self.p2, self.p3), (self.p3, self.p1)
 
     def get_circumradius(self):
         num = (self.p1 - self.p2).mag() * (self.p2 - self.p3).mag() * (self.p3 - self.p1).mag()
@@ -62,8 +79,12 @@ class Triangle:
         return self.p1.cmult(alpha) + self.p2.cmult(beta) + self.p3.cmult(gamma)
 
     def in_circumscribe(self, point):
-        if
-        return True
+        return (self.get_circumcenter() - point).mag()  < self.get_circumradius()
+
+    def has_edge(self, e1, e2):
+        return (self.p1 == e1 or self.p2 == e1 or self.p3 == e1) and \
+                (self.p1 == e2 or self.p2 == e2 or self.p3 == e2) and \
+                (not(e1 == e2))
 
     def __str__(self):
         return str(self.p1) + ", " + str(self.p2) + ", " + str(self.p3)
@@ -105,15 +126,15 @@ with open(sys.argv[1]) as f:
         #print(x, y)
         #print(min_x, max_x, min_y, max_y)
 
-        points_list.append((int(to_add[0]), int(to_add[1])))
+        points_list.append(Point(int(to_add[0]), int(to_add[1])))
 #print(min_x, max_x, min_y, max_y)
 width = max_x - min_x
 height = max_y - min_y
-point1 = Point(min_x - 1 - (width//2), min_y - (height//10) - 1)
-point2 = Point(max_x + 1 + (width//2), min_y - (height//10) - 1)
-point3 = Point((min_x + max_x)/2, max_y + 1 + height)
+point1 = Point(min_x - 2 - (width//2), min_y - (height//10) - 1)
+point2 = Point(max_x + 2 + (width//2), min_y - (height//10) - 1)
+point3 = Point((min_x + max_x)//2, max_y + 1 + height + (height//2))
 super_triangle = Triangle(point1, point2, point3)
-super_triangle.plot_triangle()
+#super_triangle.plot_triangle()
 triangulation.append(super_triangle)
 center = super_triangle.get_circumcenter()
 radius = super_triangle.get_circumradius()
@@ -123,14 +144,55 @@ print(center, radius)
 
 
 
+for i in points_list:
+
+    bad = list()
+    for t in triangulation:
+        if t.in_circumscribe(i):
+            bad.append(t)
+    polygon = list()
+
+    for t in bad:
+        for e in t.get_edges():
+            is_contained = False
+            for k in bad:
+                if not(t == k):
+                    if k.has_edge(e[0], e[1]):
+                        is_contained = True
+            if (not(is_contained)):
+                polygon.append(e)
+    for t in bad:
+        size_before = len(triangulation)
+        triangulation.remove(t)
+        print(size_before, len(triangulation))
+    for e in polygon:
+        newTri = Triangle(e[0], e[1], i)
+        triangulation.append(newTri)
+
+
+for t in triangulation:
+    if t.has_common_vertex(super_triangle):
+        #t.plot_triangle()
+        size_before = len(triangulation)
+        triangulation.remove(t)
+        print(size_before, len(triangulation))
+
+print(super_triangle)
+for t in triangulation:
+    if(not(t.has_common_vertex(super_triangle))):  #shouldn't be necessary since it was removed previously,
+                                                   #but list.remove wasn't always working previously...
+        t.plot_triangle()
+    #plt.gca().add_patch(plt.Circle(t.get_circumcenter().pair(), t.get_circumradius(), fill=False))
+
+
 
 
 
 
 for i in points_list:
-    plt.scatter(i[0], i[1])
+    plt.scatter(i.x, i.y)
 print(center.pair())
 
 plt.gca().set_aspect("equal")
-plt.gca().add_patch(plt.Circle(center.pair(), radius, fill=False))
+#plt.gca().add_patch(plt.Circle(center.pair(), radius, fill=False))
 plt.show()
