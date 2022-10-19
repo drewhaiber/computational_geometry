@@ -58,15 +58,7 @@ function pointsToFan(points: number[], desiredEdgePoints: number, radius: number
   return fans;
 }
 
-function run(): void {
-  const canvas = document.querySelector("canvas");
-
-  const gl = canvas.getContext("webgl");
-
-  if (!gl) {
-    // TODO: add something displaying error to user.
-  }
-
+function display(gl: WebGLRenderingContext, lines: number[], points: number[]):void {
   var vertexShader = createVertexShader(gl, vertShaderFile);
   var fragmentShader = createFragmentShader(gl, fragShaderFile);
 
@@ -79,17 +71,6 @@ function run(): void {
   var positionBuffer = gl.createBuffer();
 
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-
-  var lines = [
-    0, 0,
-    0.5, 0.5,
-  ]
-
-  var points = [
-    0, 0,
-    0.5, 0.5,
-    -0.82, 0.44,
-  ]
 
   points = pointsToFan(points, 12, 0.02);
 
@@ -109,7 +90,7 @@ function run(): void {
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
   var size: number = 2;  // 2 elements per point
-  var type = gl.FLOAT;   // The elements are floats
+  var type = gl.FLOAT;  // The elements are floats
   var normalize: boolean = false;
   var stride: number = 0;
   var offset: number = 0;
@@ -131,6 +112,35 @@ function run(): void {
   var offset = lines.length / 2;
   var count = points.length / 2;
   gl.drawArrays(primativeType, offset, count);
+}
+
+function run(): void {
+  const canvas = document.querySelector("canvas");
+
+  const gl = canvas.getContext("webgl");
+
+  if (!gl) {
+    // TODO: add something displaying error to user.
+  }
+
+  var lines = []
+  var points = []
+
+  display(gl, lines, points);
+
+  canvas.onmousedown = function(event: MouseEvent) {
+    console.log("offsetX:" + event.offsetX);
+    console.log("offsetY:" + event.offsetY);
+
+    var x = (-canvas.width / 2 + event.offsetX) / (canvas.width / 2);
+    var y = (canvas.height / 2 - event.offsetY) / (canvas.height / 2);
+
+    console.log("X: " + x);
+    console.log("Y: " + y);
+
+    points = points.concat([x, y]);
+    display(gl, lines, points);
+  }
 }
 
 run()

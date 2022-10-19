@@ -551,6 +551,19 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.m-4 {
+  margin: 1rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.flex {
+  display: flex;
+}
+
 .h-\[500px\] {
   height: 500px;
 }
@@ -559,11 +572,11 @@ video {
   width: 500px;
 }
 
-.rounded-lg {
-  border-radius: 0.5rem;
+.flex-col {
+  flex-direction: column;
 }
 
-.p-4 {
-  padding: 1rem;
+.rounded-lg {
+  border-radius: 0.5rem;
 }
   
