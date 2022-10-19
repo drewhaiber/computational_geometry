@@ -43,7 +43,22 @@ function createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShader, fra
   gl.deleteProgram(program);
 }
 
-function run() {
+function pointsToFan(points: number[], desiredEdgePoints: number, radius: number): number[] {
+  var fans: number[] = [];
+  for (var i = 0; i < points.length; i += 2) {
+    var stepSize = ((2 * Math.PI) / desiredEdgePoints);
+    for (var d = 0.0; d <= (2 * Math.PI); d += stepSize) {
+      fans = fans.concat([points[i], points[i + 1],
+                          (Math.sin(d) * radius + points[i]),
+                          (Math.cos(d) * radius + points[i + 1]),
+                          (Math.sin(d + stepSize) * radius + points[i]),
+                          (Math.cos(d + stepSize) * radius + points[i + 1])]);
+    }
+  }
+  return fans;
+}
+
+function run(): void {
   const canvas = document.querySelector("canvas");
 
   const gl = canvas.getContext("webgl");
@@ -57,22 +72,34 @@ function run() {
 
   var program = createProgram(gl, vertexShader, fragmentShader);
 
-  var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+  var positionAttributeLocation = gl.getAttribLocation(program, "aVertexPosition");
+  var colorUniformLocation = gl.getUniformLocation(program, "vColor");
+  var pointUniformLocation = gl.getUniformLocation(program, "point");
 
   var positionBuffer = gl.createBuffer();
 
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
 
-  var positions = [
+  var lines = [
     0, 0,
     0.5, 0.5,
   ]
 
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+  var points = [
+    0, 0,
+    0.5, 0.5,
+    -0.82, 0.44,
+  ]
+
+  points = pointsToFan(points, 12, 0.02);
+
+  var buffer = lines.concat(points)
+
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(buffer), gl.STATIC_DRAW);
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-  gl.clearColor(0.094, 0.094, 0.145, 1);
+  gl.clearColor(0.094, 0.094, 0.145, 1);  // Catppuccin Mocha Mantle
   gl.clear(gl.COLOR_BUFFER_BIT)
 
   gl.useProgram(program);
@@ -81,16 +108,28 @@ function run() {
 
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-  var size: number = 2;
-  var type = gl.FLOAT;
+  var size: number = 2;  // 2 elements per point
+  var type = gl.FLOAT;   // The elements are floats
   var normalize: boolean = false;
   var stride: number = 0;
   var offset: number = 0;
   gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
 
+  gl.uniform4f(colorUniformLocation, 0.537, 0.706, 0.980, 1);
+  gl.uniform1i(pointUniformLocation, 1);
+
   var primativeType = gl.LINES;
   var offset = 0;
-  var count = 2;
+  var count = lines.length / 2;
+  console.log(count);
+  gl.drawArrays(primativeType, offset, count);
+
+  gl.uniform4f(colorUniformLocation, 0.953, 0.545, 0.659, 1);
+  gl.uniform1i(pointUniformLocation, 1);
+
+  var primativeType = gl.TRIANGLES;
+  var offset = lines.length / 2;
+  var count = points.length / 2;
   gl.drawArrays(primativeType, offset, count);
 }
 
