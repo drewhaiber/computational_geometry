@@ -1,19 +1,17 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <title>Using Paper.js with typescript</title>
-    <style>
-        canvas {
-            position : fixed;
-            top      : 350;
-            left     : 350;
-            width    : 100vw;
-            height   : 100vh;
-        }
-    </style>
-</head>
-<body>
-<canvas id="canvas"></canvas>
-<script src="delaunay-triangulation.js" ></script>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./main.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+
+        <title>Delaunay Triangulation</title>
+    </head>
+    <body>
+        <canvas id="canvas" class="w-[500px] h-[400px] p-4 rounded-lg"></canvas>
+        <script src="dist/delaunay-triangulation.js" ></script>
+    </body>
 </html>
