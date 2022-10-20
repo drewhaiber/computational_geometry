@@ -138,7 +138,7 @@ function run(): void {
     console.log("X: " + x);
     console.log("Y: " + y);
 
-    points = points.concat([x, y]);
+    points = points.concat([x, y]);  // TODO: check if the point is already in the list. (edge case, but still.)
     display(gl, lines, points);
   }
 }

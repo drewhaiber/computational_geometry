@@ -3,6 +3,8 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+
+
 class Point:
     def __init__(self, x, y):
         self.x = x
