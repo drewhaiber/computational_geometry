@@ -114,6 +114,142 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[]):v
   gl.drawArrays(primativeType, offset, count);
 }
 
+class Point {
+  public x: number;
+  public y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  public cmult(c: number): Point {
+    return new Point(this.x * c, this.y * c);
+  }
+
+  public add(other: Point): Point {
+    return new Point(this.x + other.x, this.y + other.y);
+  }
+
+  public sub(other: Point): Point {
+    return this.add(other.cmult(-1));
+  }
+
+  public equals(other: Point): boolean {
+    return this.x == other.x && this.y == other.y;
+  }
+
+  public mag(): number {
+    return Math.sqrt((this.x ** 2) + (this.y ** 2));
+  }
+
+  public crossMag(other: Point):number {
+    return Math.abs((this.x * other.x) + (this.y * other.y));
+  }
+
+  public dot(other: Point): number {
+    return (this.x * other.x) + (this.y * other.y);
+  }
+
+  public pair(): number[] {
+    return [this.x, this.y];
+  }
+}
+
+class Triangle {
+  public p1: Point;
+  public p2: Point;
+  public p3: Point;
+
+  constructor(p1: Point, p2: Point, p3: Point) {
+    this.p1 = p1;
+    this.p2 = p2;
+    this.p3 = p3;
+  }
+
+  public equals(other: Triangle): boolean {
+    return ((this.p1 == other.p1 && this.p2 == other.p2 && this.p3 == other.p3) ||
+            (this.p1 == other.p1 && this.p2 == other.p3 && this.p3 == other.p2) ||
+            (this.p1 == other.p2 && this.p2 == other.p1 && this.p3 == other.p3) ||
+            (this.p1 == other.p2 && this.p2 == other.p3 && this.p3 == other.p1) ||
+            (this.p1 == other.p3 && this.p2 == other.p1 && this.p3 == other.p2) ||
+            (this.p1 == other.p3 && this.p2 == other.p2 && this.p3 == other.p1));
+  }
+  
+  public hasCommmonVertex(other): boolean {
+    return (this.p1 == other.p1 || this.p2 == other.p1 || this.p3 == other.p1 ||
+            this.p1 == other.p2 || this.p2 == other.p2 || this.p3 == other.p2 ||
+            this.p1 == other.p3 || this.p2 == other.p3 || this.p3 == other.p3);
+  }
+
+  // TODO: get edges if we need
+
+  public getCircumradius(): number {
+    var num: number = (this.p1.sub(this.p2).mag() *
+                       this.p2.sub(this.p3).mag() * 
+                       this.p3.sub(this.p1).mag());
+    var denom: number = 2 * this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3));
+    return num / denom;
+  }
+
+  public getCircumcenter(): Point {
+    var denom: number = 2 * (this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3)) ** 2);
+    var alpha: number = ((this.p2.sub(this.p3).mag() ** 2) * this.p1.sub(this.p3).dot(this.p1.sub(this.p2))) / denom;
+    var beta: number = ((this.p1.sub(this.p3).mag() ** 2) * this.p2.sub(this.p3).dot(this.p2.sub(this.p1))) / denom;
+    var gamma: number = ((this.p1.sub(this.p2).mag() ** 2) * this.p3.sub(this.p1).dot(this.p3.sub(this.p2))) / denom;
+    return this.p1.cmult(alpha).add(this.p2.cmult(beta)).add(this.p3.cmult(gamma));
+  }
+
+  public inCircumscribe(point: Point): boolean {
+    return this.getCircumcenter().sub(point).mag() < this.getCircumradius();
+  }
+}
+
+function triangulation(gl: WebGLRenderingContext, points: number[], step: boolean = false) {
+  var pointsList: Point[] = [];
+  var triangles: Triangle[] = [];
+  
+  if (points.length < 2) {
+    return triangles;
+  }
+
+  var minX: number = points[0];
+  var maxX: number = minX;
+  var minY: number = points[1];
+  var maxY: number = minY;
+
+  for (var i: number = 0; i < points.length; i += 2) {
+    if (points[i] < minX) {
+      minX = points[i];
+    }
+    if (points[i] > maxX) {
+      maxX = points[i];
+    }
+    if (points[i + 1] < minY) {
+      minY = points[i + 1];
+    }
+    if (points[i + 1] > maxY) {
+      maxY = points[i + 1];
+    }
+
+    pointsList.push(new Point(points[i], points[i + 1]));
+  }
+
+  var width: number = maxX - minX;
+  var height: number = maxY - minY;
+  var point1: Point = new Point(minX - 2 - Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
+  var point2: Point = new Point(maxX + 2 + Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
+  var point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + 1 + height + Math.floor(height / 2));
+  var superTriangle: Triangle = new Triangle(point1, point2, point3);
+
+  triangles.push(superTriangle)
+
+  var center: Point = superTriangle.getCircumcenter();
+  var radius: number = superTriangle.getCircumradius();
+
+  
+}
+
 function run(): void {
   const canvas = document.querySelector("canvas");
 
@@ -142,5 +278,7 @@ function run(): void {
     display(gl, lines, points);
   }
 }
+
+
 
 run()

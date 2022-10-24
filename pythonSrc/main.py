@@ -81,7 +81,7 @@ class Triangle:
         return self.p1.cmult(alpha) + self.p2.cmult(beta) + self.p3.cmult(gamma)
 
     def in_circumscribe(self, point):
-        return (self.get_circumcenter() - point).mag()  < self.get_circumradius()
+        return (self.get_circumcenter() - point).mag() < self.get_circumradius()
 
     def has_edge(self, e1, e2):
         return (self.p1 == e1 or self.p2 == e1 or self.p3 == e1) and \
@@ -119,7 +119,7 @@ with open(sys.argv[1]) as f:
    # print(x, y)
     for l in points:
         to_add = l.split(" ")
-        x = (int(to_add[0]))
+        x = int(to_add[0])
         y = int(to_add[1])
         min_x = min(min_x, x)
         max_x = max(max_x, x)
