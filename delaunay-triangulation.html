@@ -8,22 +8,54 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
 
+        <script src="./dist/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+
         <title>Delaunay Triangulation</title>
     </head>
-    <body class="flex flex-col bg-gray-700">
-        <div class="mx-auto">
-            <canvas id="canvas" width="500" height="500" class="w-[500px] h-[500px] m-4 rounded-lg"></canvas>
+    <body class="flex flex-col my-4 bg-gray-700 md:flex-row">
+        <div class="flex flex-col mx-auto">
+            <canvas id="canvas" width="500" height="500" class="w-[500px] h-[500px] mx-4 rounded-lg"></canvas>
             <!-- ^^^ ALWAYS ENSURE THAT HTML WIDTH AND HEIGHT MATCH CSS WIDTH AND HEIGHT ^^^ -->
+            <div class="flex flex-row mx-auto space-x-4">
+                <button id="triangulate" class="px-2 mx-auto my-4 text-gray-100 rounded-2xl outline outline-gray-100 outline-1 hover:bg-gray-100 hover:text-gray-700">
+                    Triangulate
+                </button>
+                <button id="clear" class="px-2 mx-auto my-4 text-gray-100 rounded-2xl outline outline-gray-100 outline-1 hover:bg-gray-100 hover:text-gray-700">
+                    Clear
+                </button>
+            </div>
         </div>
         
-        <div class="flex flex-row mx-auto space-x-4">
-            <button id="triangulate" class="px-2 mx-auto my-4 text-gray-100 rounded-2xl outline outline-gray-100 outline-1 hover:bg-gray-100 hover:text-gray-700">
-                Triangulate
-            </button>
-            <button id="clear" class="px-2 mx-auto my-4 text-gray-100 rounded-2xl outline outline-gray-100 outline-1 hover:bg-gray-100 hover:text-gray-700">
-                Clear
-            </button>
+        
+        <div class="mx-auto">
+            <pre><code class="rounded-lg language-javascript">
+function BowyerWatson (pointList)
+   triangulation := empty triangle mesh data structure
+   add super-triangle to triangulation
+   for each point in pointList do
+      badTriangles := empty set
+      for each triangle in triangulation do
+         if point is inside circumcircle of triangle
+            add triangle to badTriangles
+      polygon := empty set
+      for each triangle in badTriangles do
+         for each edge in triangle do
+            if edge is not shared by any other triangles in badTriangles
+               add edge to polygon
+      for each triangle in badTriangles do
+         remove triangle from triangulation
+      for each edge in polygon do
+         newTri := form a triangle from edge to point
+         add newTri to triangulation
+   for each triangle in triangulation
+      if triangle contains a vertex from original super-triangle
+         remove triangle from triangulation
+   return triangulation
+            </code></pre>
         </div>
+        
+        
 
     </body>
     <script src="dist/delaunay-triangulation.js" ></script>
