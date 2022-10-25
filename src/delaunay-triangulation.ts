@@ -6,7 +6,7 @@ function createVertexShader(gl: WebGLRenderingContext, file: string): WebGLShade
   const vertexShader = gl.createShader(gl.VERTEX_SHADER);
   gl.shaderSource(vertexShader, file);
   gl.compileShader(vertexShader);
-  var success: boolean = gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS);
+  let success: boolean = gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS);
   if (success) {
     return vertexShader;
   }
@@ -20,7 +20,7 @@ function createFragmentShader(gl: WebGLRenderingContext, file: string): WebGLSha
   const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(fragmentShader, file);
   gl.compileShader(fragmentShader);
-  var success: boolean = gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS);
+  let success: boolean = gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS);
   if (success) {
     return fragmentShader;
   }
@@ -30,11 +30,11 @@ function createFragmentShader(gl: WebGLRenderingContext, file: string): WebGLSha
 }
 
 function createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram {
-  var program = gl.createProgram();
+  let program = gl.createProgram();
   gl.attachShader(program, vertexShader);
   gl.attachShader(program, fragmentShader);
   gl.linkProgram(program);
-  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+  let success = gl.getProgramParameter(program, gl.LINK_STATUS);
   if (success) {
     return program;
   }
@@ -44,10 +44,10 @@ function createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShader, fra
 }
 
 function pointsToFan(points: number[], desiredEdgePoints: number, radius: number): number[] {
-  var fans: number[] = [];
-  for (var i = 0; i < points.length; i += 2) {
-    var stepSize = ((2 * Math.PI) / desiredEdgePoints);
-    for (var d = 0.0; d <= (2 * Math.PI); d += stepSize) {
+  let fans: number[] = [];
+  for (let i = 0; i < points.length; i += 2) {
+    let stepSize = ((2 * Math.PI) / desiredEdgePoints);
+    for (let d = 0.0; d <= (2 * Math.PI); d += stepSize) {
       fans = fans.concat([points[i], points[i + 1],
                           (Math.sin(d) * radius + points[i]),
                           (Math.cos(d) * radius + points[i + 1]),
@@ -59,22 +59,22 @@ function pointsToFan(points: number[], desiredEdgePoints: number, radius: number
 }
 
 function display(gl: WebGLRenderingContext, lines: number[], points: number[]):void {
-  var vertexShader = createVertexShader(gl, vertShaderFile);
-  var fragmentShader = createFragmentShader(gl, fragShaderFile);
+  let vertexShader = createVertexShader(gl, vertShaderFile);
+  let fragmentShader = createFragmentShader(gl, fragShaderFile);
 
-  var program = createProgram(gl, vertexShader, fragmentShader);
+  let program = createProgram(gl, vertexShader, fragmentShader);
 
-  var positionAttributeLocation = gl.getAttribLocation(program, "aVertexPosition");
-  var colorUniformLocation = gl.getUniformLocation(program, "vColor");
-  var pointUniformLocation = gl.getUniformLocation(program, "point");
+  let positionAttributeLocation = gl.getAttribLocation(program, "aVertexPosition");
+  let colorUniformLocation = gl.getUniformLocation(program, "vColor");
+  let pointUniformLocation = gl.getUniformLocation(program, "point");
 
-  var positionBuffer = gl.createBuffer();
+  let positionBuffer = gl.createBuffer();
 
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
 
   points = pointsToFan(points, 12, 0.02);
 
-  var buffer = lines.concat(points)
+  let buffer = lines.concat(points)
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(buffer), gl.STATIC_DRAW);
 
@@ -89,28 +89,28 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[]):v
 
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-  var size: number = 2;  // 2 elements per point
-  var type = gl.FLOAT;  // The elements are floats
-  var normalize: boolean = false;
-  var stride: number = 0;
-  var offset: number = 0;
+  let size: number = 2;  // 2 elements per point
+  let type = gl.FLOAT;  // The elements are floats
+  let normalize: boolean = false;
+  let stride: number = 0;
+  let offset: number = 0;
   gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
 
   gl.uniform4f(colorUniformLocation, 0.537, 0.706, 0.980, 1);
   gl.uniform1i(pointUniformLocation, 1);
 
-  var primativeType = gl.LINES;
-  var offset = 0;
-  var count = lines.length / 2;
+  let primativeType = gl.LINES;
+  offset = 0;
+  let count = lines.length / 2;
   console.log(count);
   gl.drawArrays(primativeType, offset, count);
 
   gl.uniform4f(colorUniformLocation, 0.953, 0.545, 0.659, 1);
   gl.uniform1i(pointUniformLocation, 1);
 
-  var primativeType = gl.TRIANGLES;
-  var offset = lines.length / 2;
-  var count = points.length / 2;
+  primativeType = gl.TRIANGLES;
+  offset = lines.length / 2;
+  count = points.length / 2;
   gl.drawArrays(primativeType, offset, count);
 }
 
@@ -144,7 +144,7 @@ class Point {
   }
 
   public crossMag(other: Point):number {
-    return Math.abs((this.x * other.x) + (this.y * other.y));
+    return Math.abs((this.x * other.y) - (this.y * other.x));
   }
 
   public dot(other: Point): number {
@@ -168,57 +168,74 @@ class Triangle {
   }
 
   public equals(other: Triangle): boolean {
-    return ((this.p1 == other.p1 && this.p2 == other.p2 && this.p3 == other.p3) ||
-            (this.p1 == other.p1 && this.p2 == other.p3 && this.p3 == other.p2) ||
-            (this.p1 == other.p2 && this.p2 == other.p1 && this.p3 == other.p3) ||
-            (this.p1 == other.p2 && this.p2 == other.p3 && this.p3 == other.p1) ||
-            (this.p1 == other.p3 && this.p2 == other.p1 && this.p3 == other.p2) ||
-            (this.p1 == other.p3 && this.p2 == other.p2 && this.p3 == other.p1));
+    return ((this.p1.equals(other.p1) && this.p2.equals(other.p2) && this.p3.equals(other.p3)) ||
+            (this.p1.equals(other.p1) && this.p2.equals(other.p3) && this.p3.equals(other.p2)) ||
+            (this.p1.equals(other.p2) && this.p2.equals(other.p1) && this.p3.equals(other.p3)) ||
+            (this.p1.equals(other.p2) && this.p2.equals(other.p3) && this.p3.equals(other.p1)) ||
+            (this.p1.equals(other.p3) && this.p2.equals(other.p1) && this.p3.equals(other.p2)) ||
+            (this.p1.equals(other.p3) && this.p2.equals(other.p2) && this.p3.equals(other.p1)));
   }
   
-  public hasCommmonVertex(other): boolean {
-    return (this.p1 == other.p1 || this.p2 == other.p1 || this.p3 == other.p1 ||
-            this.p1 == other.p2 || this.p2 == other.p2 || this.p3 == other.p2 ||
-            this.p1 == other.p3 || this.p2 == other.p3 || this.p3 == other.p3);
+  public hasCommmonVertex(other: Triangle): boolean {
+    return (this.p1.equals(other.p1) || this.p2.equals(other.p1) || this.p3.equals(other.p1) ||
+            this.p1.equals(other.p2) || this.p2.equals(other.p2) || this.p3.equals(other.p2) ||
+            this.p1.equals(other.p3) || this.p2.equals(other.p3) || this.p3.equals(other.p3));
   }
 
-  // TODO: get edges if we need
+  public getEdges(): Point[][] {
+    return [[this.p1, this.p2], [this.p2, this.p3], [this.p3, this.p1]];
+  }
 
   public getCircumradius(): number {
-    var num: number = (this.p1.sub(this.p2).mag() *
+    let num: number = (this.p1.sub(this.p2).mag() *
                        this.p2.sub(this.p3).mag() * 
                        this.p3.sub(this.p1).mag());
-    var denom: number = 2 * this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3));
+    let denom: number = 2 * this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3));
     return num / denom;
   }
 
   public getCircumcenter(): Point {
-    var denom: number = 2 * (this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3)) ** 2);
-    var alpha: number = ((this.p2.sub(this.p3).mag() ** 2) * this.p1.sub(this.p3).dot(this.p1.sub(this.p2))) / denom;
-    var beta: number = ((this.p1.sub(this.p3).mag() ** 2) * this.p2.sub(this.p3).dot(this.p2.sub(this.p1))) / denom;
-    var gamma: number = ((this.p1.sub(this.p2).mag() ** 2) * this.p3.sub(this.p1).dot(this.p3.sub(this.p2))) / denom;
+    let denom: number = 2 * (this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3)) ** 2);
+    let alpha: number = ((this.p2.sub(this.p3).mag() ** 2) * this.p1.sub(this.p3).dot(this.p1.sub(this.p2))) / denom;
+    let beta: number = ((this.p1.sub(this.p3).mag() ** 2) * this.p2.sub(this.p3).dot(this.p2.sub(this.p1))) / denom;
+    let gamma: number = ((this.p1.sub(this.p2).mag() ** 2) * this.p3.sub(this.p1).dot(this.p3.sub(this.p2))) / denom;
     return this.p1.cmult(alpha).add(this.p2.cmult(beta)).add(this.p3.cmult(gamma));
   }
 
   public inCircumscribe(point: Point): boolean {
     return this.getCircumcenter().sub(point).mag() < this.getCircumradius();
   }
+
+  public hasEdge(endPoint1: Point, endPoint2: Point): boolean {
+    return ((this.p1.equals(endPoint1) || this.p2.equals(endPoint1) || this.p3.equals(endPoint1)) &&
+            (this.p1.equals(endPoint2) || this.p2.equals(endPoint2) || this.p3.equals(endPoint2)) &&
+            !endPoint1.equals(endPoint2));
+  }
+}
+
+function getTriangleIndex(triangleList: Triangle[], triangle: Triangle): number {
+  for (let i: number = 0; i < triangleList.length; i++) {
+    if (triangleList[i].equals(triangle)) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 function triangulation(gl: WebGLRenderingContext, points: number[], step: boolean = false) {
-  var pointsList: Point[] = [];
-  var triangles: Triangle[] = [];
+  let pointsList: Point[] = [];
+  let triangles: Triangle[] = [];
   
   if (points.length < 2) {
     return triangles;
   }
 
-  var minX: number = points[0];
-  var maxX: number = minX;
-  var minY: number = points[1];
-  var maxY: number = minY;
+  let minX: number = points[0];
+  let maxX: number = minX;
+  let minY: number = points[1];
+  let maxY: number = minY;
 
-  for (var i: number = 0; i < points.length; i += 2) {
+  for (let i: number = 0; i < points.length; i += 2) {
     if (points[i] < minX) {
       minX = points[i];
     }
@@ -235,19 +252,80 @@ function triangulation(gl: WebGLRenderingContext, points: number[], step: boolea
     pointsList.push(new Point(points[i], points[i + 1]));
   }
 
-  var width: number = maxX - minX;
-  var height: number = maxY - minY;
-  var point1: Point = new Point(minX - 2 - Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
-  var point2: Point = new Point(maxX + 2 + Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
-  var point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + 1 + height + Math.floor(height / 2));
-  var superTriangle: Triangle = new Triangle(point1, point2, point3);
+  let width: number = maxX - minX;
+  let height: number = maxY - minY;
+  let point1: Point = new Point(minX - 2 - Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
+  let point2: Point = new Point(maxX + 2 + Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
+  let point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + 1 + height + Math.floor(height / 2));
+  let superTriangle: Triangle = new Triangle(point1, point2, point3);
 
-  triangles.push(superTriangle)
+  triangles.push(superTriangle);
 
-  var center: Point = superTriangle.getCircumcenter();
-  var radius: number = superTriangle.getCircumradius();
+  let center: Point = superTriangle.getCircumcenter();
+  let radius: number = superTriangle.getCircumradius();
 
+  for (let point of pointsList) {
+    let bad: Triangle[] = [];
+    for (let triangle of triangles) {
+      if (triangle.inCircumscribe(point)) {
+        bad.push(triangle);
+      }
+    }
+
+    let polygon: Point[][] = [];
+
+    for (let triangle1 of bad) {
+      for (let triangle1Edge of triangle1.getEdges()) {
+        
+        let isContained: boolean = false;
+        for (let triangle2 of bad) {
+          if (!triangle1.equals(triangle2) && triangle2.hasEdge(triangle1Edge[0], triangle1Edge[1])) {
+            isContained = true;
+          }
+        }
+        if (!isContained) {
+          polygon.push(triangle1Edge);
+        }
+      }
+    }
+
+    for (let triangle of bad) {
+      const index: number = getTriangleIndex(triangles, triangle);
+      if (index > -1) {
+        triangles.splice(index, 1);
+      } 
+      else {
+        console.log("Unable to remove triangle from array!")
+      }
+    }
+    for (let edge of polygon) {
+      triangles.push(new Triangle(edge[0], edge[1], point));
+    }
+  }
   
+  let lines: number[] = [];
+
+  let i: number = 0;
+  while (i < triangles.length) {
+    let triangle: Triangle = triangles[i];
+    if (triangle.hasCommmonVertex(superTriangle)) {
+      const index: number = getTriangleIndex(triangles, triangle);
+      if (index > -1) {
+        triangles.splice(index, 1);
+      } 
+      else {
+        console.log("Unable to remove triangle from array!");
+      }
+    }
+    else {
+      for (let edge of triangle.getEdges()) {
+        lines.push(edge[0].x, edge[0].y, edge[1].x, edge[1].y);
+      }
+      i++;
+    }
+  }
+
+  display(gl, lines, points)
 }
 
 function run(): void {
@@ -259,17 +337,20 @@ function run(): void {
     // TODO: add something displaying error to user.
   }
 
-  var lines = []
-  var points = []
+  let lines = []
+  let points = []
 
   display(gl, lines, points);
+
+  const triangulateButton = document.getElementById("triangulate");
+  const clear = document.getElementById("clear");
 
   canvas.onmousedown = function(event: MouseEvent) {
     console.log("offsetX:" + event.offsetX);
     console.log("offsetY:" + event.offsetY);
 
-    var x = (-canvas.width / 2 + event.offsetX) / (canvas.width / 2);
-    var y = (canvas.height / 2 - event.offsetY) / (canvas.height / 2);
+    let x = (-canvas.width / 2 + event.offsetX) / (canvas.width / 2);
+    let y = (canvas.height / 2 - event.offsetY) / (canvas.height / 2);
 
     console.log("X: " + x);
     console.log("Y: " + y);
@@ -277,6 +358,16 @@ function run(): void {
     points = points.concat([x, y]);  // TODO: check if the point is already in the list. (edge case, but still.)
     display(gl, lines, points);
   }
+
+  triangulateButton.addEventListener("click", function() {
+    triangulation(gl, points);
+  });
+
+  clear.addEventListener("click", function() {
+    lines = [];
+    points = [];
+    display(gl, lines, points);
+  });
 }
 
 

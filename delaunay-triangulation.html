@@ -10,11 +10,21 @@
 
         <title>Delaunay Triangulation</title>
     </head>
-    <body class="flex flex-col">
+    <body class="flex flex-col bg-gray-700">
         <div class="mx-auto">
             <canvas id="canvas" width="500" height="500" class="w-[500px] h-[500px] m-4 rounded-lg"></canvas>
             <!-- ^^^ ALWAYS ENSURE THAT HTML WIDTH AND HEIGHT MATCH CSS WIDTH AND HEIGHT ^^^ -->
         </div>
-        <script src="dist/delaunay-triangulation.js" ></script>
+        
+        <div class="flex flex-row mx-auto space-x-4">
+            <button id="triangulate" class="px-2 mx-auto my-4 text-gray-100 rounded-2xl outline outline-gray-100 outline-1 hover:bg-gray-100 hover:text-gray-700">
+                Triangulate
+            </button>
+            <button id="clear" class="px-2 mx-auto my-4 text-gray-100 rounded-2xl outline outline-gray-100 outline-1 hover:bg-gray-100 hover:text-gray-700">
+                Clear
+            </button>
+        </div>
+
     </body>
+    <script src="dist/delaunay-triangulation.js" ></script>
 </html>
