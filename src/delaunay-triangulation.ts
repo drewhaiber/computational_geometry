@@ -117,18 +117,20 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[]):v
 class Point {
   public x: number;
   public y: number;
+  public z: number;
 
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, z: number) {
     this.x = x;
     this.y = y;
+	this.z = z;
   }
 
   public cmult(c: number): Point {
-    return new Point(this.x * c, this.y * c);
+    return new Point(this.x * c, this.y * c, this.z * c);
   }
 
   public add(other: Point): Point {
-    return new Point(this.x + other.x, this.y + other.y);
+    return new Point(this.x + other.x, this.y + other.y, this.z + other.z);
   }
 
   public sub(other: Point): Point {
@@ -136,21 +138,26 @@ class Point {
   }
 
   public equals(other: Point): boolean {
-    return this.x == other.x && this.y == other.y;
+    return this.x == other.x && this.y == other.y && this.z == other.z;
   }
 
   public mag(): number {
-    return Math.sqrt((this.x ** 2) + (this.y ** 2));
+    return Math.sqrt((this.x ** 2) + (this.y ** 2) + (this.z ** 2));
   }
 
-  public crossMag(other: Point):number {
-    return Math.abs((this.x * other.y) - (this.y * other.x));
+//  public crossMag(other: Point):number {
+//    return Math.abs((this.x * other.y) - (this.y * other.x));
+// }
+
+  public cross(other: Point):Point {
+    return new Point((this.y * other.z) - (this.z * other.y), (this.x * other.z) - (this.z * other.x), (this.x * other.y) - (this.y * other.x));
   }
 
   public dot(other: Point): number {
-    return (this.x * other.x) + (this.y * other.y);
+    return (this.x * other.x) + (this.y * other.y) + (this.z * other.z);
   }
-
+  
+  //Returns point as a pair
   public pair(): number[] {
     return [this.x, this.y];
   }
@@ -190,12 +197,12 @@ class Triangle {
     let num: number = (this.p1.sub(this.p2).mag() *
                        this.p2.sub(this.p3).mag() * 
                        this.p3.sub(this.p1).mag());
-    let denom: number = 2 * this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3));
+    let denom: number = 2 * this.p1.sub(this.p2).cross(this.p2.sub(this.p3)).mag();
     return num / denom;
   }
 
   public getCircumcenter(): Point {
-    let denom: number = 2 * (this.p1.sub(this.p2).crossMag(this.p2.sub(this.p3)) ** 2);
+    let denom: number = 2 * (this.p1.sub(this.p2).cross(this.p2.sub(this.p3)).mag() ** 2);
     let alpha: number = ((this.p2.sub(this.p3).mag() ** 2) * this.p1.sub(this.p3).dot(this.p1.sub(this.p2))) / denom;
     let beta: number = ((this.p1.sub(this.p3).mag() ** 2) * this.p2.sub(this.p3).dot(this.p2.sub(this.p1))) / denom;
     let gamma: number = ((this.p1.sub(this.p2).mag() ** 2) * this.p3.sub(this.p1).dot(this.p3.sub(this.p2))) / denom;
@@ -249,14 +256,18 @@ function triangulation(gl: WebGLRenderingContext, points: number[], step: boolea
       maxY = points[i + 1];
     }
 
-    pointsList.push(new Point(points[i], points[i + 1]));
+    pointsList.push(new Point(points[i], points[i + 1], 0));
   }
 
   let width: number = maxX - minX;
   let height: number = maxY - minY;
-  let point1: Point = new Point(minX - 2 - Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
-  let point2: Point = new Point(maxX + 2 + Math.floor(width / 2), minY - Math.floor(height / 10) - 1);
-  let point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + 1 + height + Math.floor(height / 2));
+//  let point1: Point = new Point(minX - 2 - Math.floor(width / 2), minY - Math.floor(height / 10) - 1, 0);
+//  let point2: Point = new Point(maxX + 2 + Math.floor(width / 2), minY - Math.floor(height / 10) - 1, 0);
+//  let point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + 1 + height + Math.floor(height / 2), 0);
+;
+  let point1: Point = new Point(minX - (1000000), minY - (1000000), 0);
+  let point2: Point = new Point(maxX + (1000000), minY - (1000000), 0);
+  let point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + (1000000), 0);
   let superTriangle: Triangle = new Triangle(point1, point2, point3);
 
   triangles.push(superTriangle);
