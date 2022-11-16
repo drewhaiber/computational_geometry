@@ -492,7 +492,7 @@ function run(): void {
   }
 
   triangulateButton.addEventListener("click", function() {
-    triangulation(gl, points);
+    triangulation(gl, points, false, nextButton);
     showStepButton(stepButton, nextButton);
   });
 
