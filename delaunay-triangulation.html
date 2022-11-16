@@ -7,9 +7,10 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet"> 
 
-        <script src="./dist/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script>
+        <!-- <script src="./dist/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> -->
 
         <title>Delaunay Triangulation</title>
     </head>
@@ -34,7 +35,7 @@
         </div>
         
         
-        <div class="mx-auto">
+        <!-- <div class="mx-auto">
             <pre><code class="rounded-lg language-javascript">
 function BowyerWatson (pointList)
    triangulation := empty triangle mesh data structure
@@ -59,8 +60,33 @@ function BowyerWatson (pointList)
          remove triangle from triangulation
    return triangulation
             </code></pre>
+        </div> -->
+
+        <div class="mx-auto bg-gray-800 text-gray-100 rounded-lg py-4 px-2 font-mono space-y-0">
+<span id="line01" class="block px-2 rounded-md"><span class="hljs-keyword">function</span> <span class="hljs-title function_">BowyerWatson</span> (pointList)</span>
+<span id="line02" class="block px-2 rounded-md">&emsp;triangulation := empty triangle mesh data structure</span>
+<span id="line03" class="block px-2 rounded-md">&emsp;add super-triangle to triangulation</span>
+<span id="line04" class="block px-2 rounded-md">&emsp;<span class="hljs-keyword">for</span> each point <span class="hljs-keyword">in</span> pointList <span class="hljs-keyword">do</span></span>
+<span id="line05" class="block px-2 rounded-md">&emsp;&emsp;badTriangles := empty set</span>
+<span id="line06" class="block px-2 rounded-md">&emsp;&emsp;<span class="hljs-keyword">for</span> each triangle <span class="hljs-keyword">in</span> triangulation <span class="hljs-keyword">do</span></span>
+<span id="line07" class="block px-2 rounded-md">&emsp;&emsp;&emsp;<span class="hljs-keyword">if</span> point is inside circumcircle <span class="hljs-keyword">of</span> triangle</span>
+<span id="line08" class="block px-2 rounded-md">&emsp;&emsp;&emsp;&emsp;add triangle to badTriangles</span>
+<span id="line09" class="block px-2 rounded-md">&emsp;&emsp;polygon := empty set</span>
+<span id="line10" class="block px-2 rounded-md">&emsp;&emsp;<span class="hljs-keyword">for</span> each triangle <span class="hljs-keyword">in</span> badTriangles <span class="hljs-keyword">do</span></span>
+<span id="line11" class="block px-2 rounded-md">&emsp;&emsp;&emsp;<span class="hljs-keyword">for</span> each edge <span class="hljs-keyword">in</span> triangle <span class="hljs-keyword">do</span></span>
+<span id="line12" class="block px-2 rounded-md">&emsp;&emsp;&emsp;&emsp;<span class="hljs-keyword">if</span> edge is not shared by any other triangles <span class="hljs-keyword">in</span> badTriangles</span>
+<span id="line13" class="block px-2 rounded-md">&emsp;&emsp;&emsp;&emsp;&emsp;add edge to polygon</span>
+<span id="line14" class="block px-2 rounded-md">&emsp;&emsp;<span class="hljs-keyword">for</span> each triangle <span class="hljs-keyword">in</span> badTriangles <span class="hljs-keyword">do</span></span>
+<span id="line15" class="block px-2 rounded-md">&emsp;&emsp;&emsp;remove triangle <span class="hljs-keyword">from</span> triangulation</span>
+<span id="line16" class="block px-2 rounded-md">&emsp;&emsp;<span class="hljs-keyword">for</span> each edge <span class="hljs-keyword">in</span> polygon <span class="hljs-keyword">do</span></span>
+<span id="line17" class="block px-2 rounded-md">&emsp;&emsp;&emsp;newTri := form a triangle <span class="hljs-keyword">from</span> edge to point</span>
+<span id="line18" class="block px-2 rounded-md">&emsp;&emsp;&emsp;add newTri to triangulation</span>
+<span id="line19" class="block px-2 rounded-md">&emsp;<span class="hljs-keyword">for</span> each triangle <span class="hljs-keyword">in</span> triangulation</span>
+<span id="line20" class="block px-2 rounded-md">&emsp;&emsp;<span class="hljs-keyword">if</span> triangle contains a vertex <span class="hljs-keyword">from</span> original super-triangle</span>
+<span id="line21" class="block px-2 rounded-md">&emsp;&emsp;&emsp;remove triangle <span class="hljs-keyword">from</span> triangulation</span>
+<span id="line22" class="block px-2 rounded-md">&emsp;<span class="hljs-keyword">return</span> triangulation</span>
         </div>
-        
+
         
 
     </body>

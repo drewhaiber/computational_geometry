@@ -1,10 +1,11 @@
 module.exports = {
   content: [
-      './delaunay-triangulation.html'
+      './*.html'
   ],
   theme: {
     fontFamily: {
-      'sans': ['Montserrat']
+      'sans': ['Montserrat'],
+      'mono': ['Inconsolata']
     },
     colors: {
       transparent: 'transparent',

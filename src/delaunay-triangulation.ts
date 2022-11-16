@@ -229,6 +229,17 @@ function getTriangleIndex(triangleList: Triangle[], triangle: Triangle): number 
   return -1;
 }
 
+async function highlightAndWait(lineNumber: string, button: HTMLElement): Promise<void> {
+  let line: HTMLElement = document.getElementById(lineNumber);
+  line.style.outline = "solid"
+  line.style.outlineWidth = "4px"
+  line.style.outlineColor = "#96CDFB"
+  await waitForButtonPress(button);
+
+  line.style.outline = "2px solid transparent";
+  line.style.outlineOffset = "2px";
+}
+
 async function waitForButtonPress(button: HTMLElement): Promise<void> {
   let stop: (value: unknown) => void;
 
@@ -244,6 +255,11 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
                              step: boolean = false, nextButton: HTMLElement = new HTMLElement()): Promise<Triangle[]> {
   let pointsList: Point[] = [];
   let triangles: Triangle[] = [];
+
+  if (step) {
+    display(gl, [], points);
+    await highlightAndWait("line02", nextButton);
+  }
   
   if (points.length < 2) {
     return triangles;
@@ -284,40 +300,81 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
 
   triangles.push(superTriangle);
 
-  let center: Point = superTriangle.getCircumcenter();
-  let radius: number = superTriangle.getCircumradius();
-
   if (step) {
     display(gl, [], points);
-    waitForButtonPress(nextButton);
+    await highlightAndWait("line03", nextButton);
   }
 
   for (let point of pointsList) {
+    if (step) {
+      display(gl, [], points);
+      await highlightAndWait("line04", nextButton);
+    }
     let bad: Triangle[] = [];
+    if (step) {
+      display(gl, [], points);
+      await highlightAndWait("line05", nextButton);
+    }
     for (let triangle of triangles) {
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line06", nextButton);
+      }
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line07", nextButton);
+      }
       if (triangle.inCircumscribe(point)) {
+        
         bad.push(triangle);
+        if (step) {
+          display(gl, [], points);
+          await highlightAndWait("line08", nextButton);
+        }
       }
     }
 
     let polygon: Point[][] = [];
+    if (step) {
+      display(gl, [], points);
+      await highlightAndWait("line09", nextButton);
+    }
 
     for (let triangle1 of bad) {
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line10", nextButton);
+      }
       for (let triangle1Edge of triangle1.getEdges()) {
-        
+        if (step) {
+          display(gl, [], points);
+          await highlightAndWait("line11", nextButton);
+        }
         let isContained: boolean = false;
         for (let triangle2 of bad) {
           if (!triangle1.equals(triangle2) && triangle2.hasEdge(triangle1Edge[0], triangle1Edge[1])) {
             isContained = true;
           }
         }
+        if (step) {
+          display(gl, [], points);
+          await highlightAndWait("line12", nextButton);
+        }
         if (!isContained) {
           polygon.push(triangle1Edge);
+          if (step) {
+            display(gl, [], points);
+            await highlightAndWait("line13", nextButton);
+          }
         }
       }
     }
 
     for (let triangle of bad) {
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line14", nextButton);
+      }
       const index: number = getTriangleIndex(triangles, triangle);
       if (index > -1) {
         triangles.splice(index, 1);
@@ -325,9 +382,25 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
       else {
         console.log("Unable to remove triangle from array!")
       }
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line15", nextButton);
+      }
     }
     for (let edge of polygon) {
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line16", nextButton);
+      }
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line17", nextButton);
+      }
       triangles.push(new Triangle(edge[0], edge[1], point));
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line18", nextButton);
+      }
     }
   }
   
@@ -336,6 +409,14 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
   let i: number = 0;
   while (i < triangles.length) {
     let triangle: Triangle = triangles[i];
+    if (step) {
+      display(gl, [], points);
+      await highlightAndWait("line19", nextButton);
+    }
+    if (step) {
+      display(gl, [], points);
+      await highlightAndWait("line20", nextButton);
+    }
     if (triangle.hasCommmonVertex(superTriangle)) {
       const index: number = getTriangleIndex(triangles, triangle);
       if (index > -1) {
@@ -344,6 +425,10 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
       else {
         console.log("Unable to remove triangle from array!");
       }
+      if (step) {
+        display(gl, [], points);
+        await highlightAndWait("line21", nextButton);
+      }
     }
     else {
       for (let edge of triangle.getEdges()) {
@@ -351,6 +436,11 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
       }
       i++;
     }
+  }
+
+  if (step) {
+    display(gl, [], points);
+    await highlightAndWait("line22", nextButton);
   }
 
   display(gl, lines, points)
