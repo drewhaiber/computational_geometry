@@ -229,7 +229,19 @@ function getTriangleIndex(triangleList: Triangle[], triangle: Triangle): number 
   return -1;
 }
 
-function triangulation(gl: WebGLRenderingContext, points: number[], step: boolean = false) {
+async function waitForButtonPress(button: HTMLElement): Promise<void> {
+  let stop: (value: unknown) => void;
+
+  button.addEventListener("click", function () {
+    stop(0);
+  });
+
+  let promise = new Promise((resolve) => {stop = resolve});
+  await promise;
+}
+
+async function triangulation(gl: WebGLRenderingContext, points: number[],
+                             step: boolean = false, nextButton: HTMLElement = new HTMLElement()): Promise<Triangle[]> {
   let pointsList: Point[] = [];
   let triangles: Triangle[] = [];
   
@@ -274,6 +286,11 @@ function triangulation(gl: WebGLRenderingContext, points: number[], step: boolea
 
   let center: Point = superTriangle.getCircumcenter();
   let radius: number = superTriangle.getCircumradius();
+
+  if (step) {
+    display(gl, [], points);
+    waitForButtonPress(nextButton);
+  }
 
   for (let point of pointsList) {
     let bad: Triangle[] = [];
@@ -339,6 +356,16 @@ function triangulation(gl: WebGLRenderingContext, points: number[], step: boolea
   display(gl, lines, points)
 }
 
+function showStepButton(step: HTMLElement, next: HTMLElement): void {
+  step.style.display = 'block';
+  next.style.display = 'none';
+}
+
+function showNextButton(step: HTMLElement, next: HTMLElement): void {
+  step.style.display = 'none';
+  next.style.display = 'block';
+}
+
 function run(): void {
   const canvas = document.querySelector("canvas");
 
@@ -356,6 +383,8 @@ function run(): void {
   let f: Function = function(): void {};
 
   const triangulateButton = document.getElementById("triangulate");
+  const stepButton = document.getElementById("step");
+  const nextButton = document.getElementById("next");
   const clear = document.getElementById("clear");
 
   canvas.onmousedown = function(event: MouseEvent) {
@@ -374,12 +403,20 @@ function run(): void {
 
   triangulateButton.addEventListener("click", function() {
     triangulation(gl, points);
+    showStepButton(stepButton, nextButton);
+  });
+
+  stepButton.addEventListener("click", async function() {
+    showNextButton(stepButton, nextButton);
+    await triangulation(gl, points, true, nextButton);
+    showStepButton(stepButton, nextButton);
   });
 
   clear.addEventListener("click", function() {
     lines = [];
     points = [];
     display(gl, lines, points);
+    showStepButton(stepButton, nextButton);
   });
 }
 

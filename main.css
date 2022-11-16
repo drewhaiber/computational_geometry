@@ -570,12 +570,20 @@ video {
   display: flex;
 }
 
+.hidden {
+  display: none;
+}
+
 .h-\[500px\] {
   height: 500px;
 }
 
 .w-\[500px\] {
   width: 500px;
+}
+
+.w-14 {
+  width: 3.5rem;
 }
 
 .flex-row {
