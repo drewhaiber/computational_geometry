@@ -342,6 +342,8 @@ function run(): void {
 
   display(gl, lines, points);
 
+  let f: Function = function(): void {};
+
   const triangulateButton = document.getElementById("triangulate");
   const clear = document.getElementById("clear");
 
