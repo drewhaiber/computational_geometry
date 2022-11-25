@@ -247,18 +247,32 @@ async function waitForButtonPress(button: HTMLElement): Promise<void> {
     stop(0);
   });
 
+  document.addEventListener("cancelStep", function () {
+    stop(0);
+  });
+
   let promise = new Promise((resolve) => {stop = resolve});
   await promise;
 }
 
-async function triangulation(gl: WebGLRenderingContext, points: number[],
-                             step: boolean = false, nextButton: HTMLElement = new HTMLElement()): Promise<Triangle[]> {
+async function triangulation(gl: WebGLRenderingContext,
+                             points: number[],
+                             step: boolean = false,
+                             nextButton: HTMLElement = new HTMLElement()
+                            ): Promise<Triangle[]> {
+  document.addEventListener("cancelStep", function () {
+    step = false;
+  });
+
   let pointsList: Point[] = [];
   let triangles: Triangle[] = [];
 
   if (step) {
     display(gl, [], points);
     await highlightAndWait("line02", nextButton);
+    if (!step) {
+      return []
+    }
   }
   
   if (points.length < 2) {
@@ -292,7 +306,7 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
 //  let point1: Point = new Point(minX - 2 - Math.floor(width / 2), minY - Math.floor(height / 10) - 1, 0);
 //  let point2: Point = new Point(maxX + 2 + Math.floor(width / 2), minY - Math.floor(height / 10) - 1, 0);
 //  let point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + 1 + height + Math.floor(height / 2), 0);
-;
+
   let point1: Point = new Point(minX - (1000000), minY - (1000000), 0);
   let point2: Point = new Point(maxX + (1000000), minY - (1000000), 0);
   let point3: Point = new Point(Math.floor((minX + maxX) / 2), maxY + (1000000), 0);
@@ -303,26 +317,41 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
   if (step) {
     display(gl, [], points);
     await highlightAndWait("line03", nextButton);
+    if (!step) {
+      return []
+    }
   }
 
   for (let point of pointsList) {
     if (step) {
       display(gl, [], points);
       await highlightAndWait("line04", nextButton);
+      if (!step) {
+        return []
+      }
     }
     let bad: Triangle[] = [];
     if (step) {
       display(gl, [], points);
       await highlightAndWait("line05", nextButton);
+      if (!step) {
+        return []
+      }
     }
     for (let triangle of triangles) {
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line06", nextButton);
+        if (!step) {
+          return []
+        }
       }
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line07", nextButton);
+        if (!step) {
+          return []
+        }
       }
       if (triangle.inCircumscribe(point)) {
         
@@ -330,6 +359,9 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
         if (step) {
           display(gl, [], points);
           await highlightAndWait("line08", nextButton);
+          if (!step) {
+            return []
+          }
         }
       }
     }
@@ -338,17 +370,26 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
     if (step) {
       display(gl, [], points);
       await highlightAndWait("line09", nextButton);
+      if (!step) {
+        return []
+      }
     }
 
     for (let triangle1 of bad) {
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line10", nextButton);
+        if (!step) {
+          return []
+        }
       }
       for (let triangle1Edge of triangle1.getEdges()) {
         if (step) {
           display(gl, [], points);
           await highlightAndWait("line11", nextButton);
+          if (!step) {
+            return []
+          }
         }
         let isContained: boolean = false;
         for (let triangle2 of bad) {
@@ -359,12 +400,18 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
         if (step) {
           display(gl, [], points);
           await highlightAndWait("line12", nextButton);
+          if (!step) {
+            return []
+          }
         }
         if (!isContained) {
           polygon.push(triangle1Edge);
           if (step) {
             display(gl, [], points);
             await highlightAndWait("line13", nextButton);
+            if (!step) {
+              return []
+            }
           }
         }
       }
@@ -374,6 +421,9 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line14", nextButton);
+        if (!step) {
+          return []
+        }
       }
       const index: number = getTriangleIndex(triangles, triangle);
       if (index > -1) {
@@ -385,21 +435,33 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line15", nextButton);
+        if (!step) {
+          return []
+        }
       }
     }
     for (let edge of polygon) {
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line16", nextButton);
+        if (!step) {
+          return []
+        }
       }
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line17", nextButton);
+        if (!step) {
+          return []
+        }
       }
       triangles.push(new Triangle(edge[0], edge[1], point));
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line18", nextButton);
+        if (!step) {
+          return []
+        }
       }
     }
   }
@@ -412,10 +474,16 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
     if (step) {
       display(gl, [], points);
       await highlightAndWait("line19", nextButton);
+      if (!step) {
+        return []
+      }
     }
     if (step) {
       display(gl, [], points);
       await highlightAndWait("line20", nextButton);
+      if (!step) {
+        return []
+      }
     }
     if (triangle.hasCommmonVertex(superTriangle)) {
       const index: number = getTriangleIndex(triangles, triangle);
@@ -428,6 +496,9 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
       if (step) {
         display(gl, [], points);
         await highlightAndWait("line21", nextButton);
+        if (!step) {
+          return []
+        }
       }
     }
     else {
@@ -441,6 +512,9 @@ async function triangulation(gl: WebGLRenderingContext, points: number[],
   if (step) {
     display(gl, [], points);
     await highlightAndWait("line22", nextButton);
+    if (!step) {
+      return []
+    }
   }
 
   display(gl, lines, points)
@@ -470,14 +544,18 @@ function run(): void {
 
   display(gl, lines, points);
 
-  let f: Function = function(): void {};
-
   const triangulateButton = document.getElementById("triangulate");
   const stepButton = document.getElementById("step");
   const nextButton = document.getElementById("next");
   const clear = document.getElementById("clear");
 
+  let stepping = {"isStepping": false};
+  let cancelStep = new Event("cancelStep");
+
   canvas.onmousedown = function(event: MouseEvent) {
+    stepping.isStepping = false;
+    document.dispatchEvent(cancelStep);
+
     console.log("offsetX:" + event.offsetX);
     console.log("offsetY:" + event.offsetY);
 
@@ -492,17 +570,25 @@ function run(): void {
   }
 
   triangulateButton.addEventListener("click", function() {
+    stepping.isStepping = false;
+    document.dispatchEvent(cancelStep);
+
     triangulation(gl, points, false, nextButton);
     showStepButton(stepButton, nextButton);
   });
 
   stepButton.addEventListener("click", async function() {
+    stepping.isStepping = true;
+
     showNextButton(stepButton, nextButton);
     await triangulation(gl, points, true, nextButton);
     showStepButton(stepButton, nextButton);
   });
 
   clear.addEventListener("click", function() {
+    stepping.isStepping = false;
+    document.dispatchEvent(cancelStep);
+
     lines = [];
     points = [];
     display(gl, lines, points);
