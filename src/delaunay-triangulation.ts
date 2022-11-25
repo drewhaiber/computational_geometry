@@ -281,7 +281,7 @@ async function triangulation(gl: WebGLRenderingContext,
     display(gl, [], points);
     await highlightAndWait("line02", nextButton);
     if (!step) {
-      return []
+      return [];
     }
   }
   
@@ -328,7 +328,7 @@ async function triangulation(gl: WebGLRenderingContext,
     display(gl, getLinesFromTriangles(triangles), points);
     await highlightAndWait("line03", nextButton);
     if (!step) {
-      return []
+      return [];
     }
   }
 
@@ -341,7 +341,7 @@ async function triangulation(gl: WebGLRenderingContext,
       display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line04", nextButton);
       if (!step) {
-        return []
+        return [];
       }
     }
     let bad: Triangle[] = [];
@@ -349,7 +349,7 @@ async function triangulation(gl: WebGLRenderingContext,
       display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line05", nextButton);
       if (!step) {
-        return []
+        return [];
       }
     }
     for (let triangle of triangles) {
@@ -357,14 +357,14 @@ async function triangulation(gl: WebGLRenderingContext,
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line06", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line07", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
       if (triangle.inCircumscribe(point)) {
@@ -374,7 +374,7 @@ async function triangulation(gl: WebGLRenderingContext,
           display(gl, getLinesFromTriangles(triangles), displayPoints);
           await highlightAndWait("line08", nextButton);
           if (!step) {
-            return []
+            return [];
           }
         }
       }
@@ -385,7 +385,7 @@ async function triangulation(gl: WebGLRenderingContext,
       display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line09", nextButton);
       if (!step) {
-        return []
+        return [];
       }
     }
 
@@ -394,7 +394,7 @@ async function triangulation(gl: WebGLRenderingContext,
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line10", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
       for (let triangle1Edge of triangle1.getEdges()) {
@@ -402,7 +402,7 @@ async function triangulation(gl: WebGLRenderingContext,
           display(gl, getLinesFromTriangles(triangles), displayPoints);
           await highlightAndWait("line11", nextButton);
           if (!step) {
-            return []
+            return [];
           }
         }
         let isContained: boolean = false;
@@ -415,7 +415,7 @@ async function triangulation(gl: WebGLRenderingContext,
           display(gl, getLinesFromTriangles(triangles), displayPoints);
           await highlightAndWait("line12", nextButton);
           if (!step) {
-            return []
+            return [];
           }
         }
         if (!isContained) {
@@ -424,7 +424,7 @@ async function triangulation(gl: WebGLRenderingContext,
             display(gl, getLinesFromTriangles(triangles), displayPoints);
             await highlightAndWait("line13", nextButton);
             if (!step) {
-              return []
+              return [];
             }
           }
         }
@@ -436,7 +436,7 @@ async function triangulation(gl: WebGLRenderingContext,
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line14", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
       const index: number = getTriangleIndex(triangles, triangle);
@@ -450,7 +450,7 @@ async function triangulation(gl: WebGLRenderingContext,
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line15", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
     }
@@ -459,14 +459,14 @@ async function triangulation(gl: WebGLRenderingContext,
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line16", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line17", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
       triangles.push(new Triangle(edge[0], edge[1], point));
@@ -474,7 +474,7 @@ async function triangulation(gl: WebGLRenderingContext,
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line18", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
     }
@@ -489,14 +489,14 @@ async function triangulation(gl: WebGLRenderingContext,
       display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line19", nextButton);
       if (!step) {
-        return []
+        return [];
       }
     }
     if (step) {
       display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line20", nextButton);
       if (!step) {
-        return []
+        return [];
       }
     }
     if (triangle.hasCommmonVertex(superTriangle)) {
@@ -511,7 +511,7 @@ async function triangulation(gl: WebGLRenderingContext,
         display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line21", nextButton);
         if (!step) {
-          return []
+          return [];
         }
       }
     }
@@ -527,7 +527,7 @@ async function triangulation(gl: WebGLRenderingContext,
     display(gl, getLinesFromTriangles(triangles), displayPoints);
     await highlightAndWait("line22", nextButton);
     if (!step) {
-      return []
+      return [];
     }
   }
 
