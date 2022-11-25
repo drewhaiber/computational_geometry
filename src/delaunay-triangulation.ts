@@ -229,6 +229,16 @@ function getTriangleIndex(triangleList: Triangle[], triangle: Triangle): number 
   return -1;
 }
 
+function getLinesFromTriangles(triangleList: Triangle[]): number[] {
+  let lines: number[] = [];
+  for (let triangle of triangleList) {
+    for (let edge of triangle.getEdges()) {
+      lines.push(edge[0].x, edge[0].y, edge[1].x, edge[1].y);
+    }
+  }
+  return lines;
+}
+
 async function highlightAndWait(lineNumber: string, button: HTMLElement): Promise<void> {
   let line: HTMLElement = document.getElementById(lineNumber);
   line.style.outline = "solid"
@@ -315,16 +325,20 @@ async function triangulation(gl: WebGLRenderingContext,
   triangles.push(superTriangle);
 
   if (step) {
-    display(gl, [], points);
+    display(gl, getLinesFromTriangles(triangles), points);
     await highlightAndWait("line03", nextButton);
     if (!step) {
       return []
     }
   }
 
+  let displayPoints: number[] = [];
+
   for (let point of pointsList) {
+    displayPoints.push(point.x, point.y);
+
     if (step) {
-      display(gl, [], points);
+      display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line04", nextButton);
       if (!step) {
         return []
@@ -332,7 +346,7 @@ async function triangulation(gl: WebGLRenderingContext,
     }
     let bad: Triangle[] = [];
     if (step) {
-      display(gl, [], points);
+      display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line05", nextButton);
       if (!step) {
         return []
@@ -340,14 +354,14 @@ async function triangulation(gl: WebGLRenderingContext,
     }
     for (let triangle of triangles) {
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line06", nextButton);
         if (!step) {
           return []
         }
       }
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line07", nextButton);
         if (!step) {
           return []
@@ -357,7 +371,7 @@ async function triangulation(gl: WebGLRenderingContext,
         
         bad.push(triangle);
         if (step) {
-          display(gl, [], points);
+          display(gl, getLinesFromTriangles(triangles), displayPoints);
           await highlightAndWait("line08", nextButton);
           if (!step) {
             return []
@@ -368,7 +382,7 @@ async function triangulation(gl: WebGLRenderingContext,
 
     let polygon: Point[][] = [];
     if (step) {
-      display(gl, [], points);
+      display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line09", nextButton);
       if (!step) {
         return []
@@ -377,7 +391,7 @@ async function triangulation(gl: WebGLRenderingContext,
 
     for (let triangle1 of bad) {
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line10", nextButton);
         if (!step) {
           return []
@@ -385,7 +399,7 @@ async function triangulation(gl: WebGLRenderingContext,
       }
       for (let triangle1Edge of triangle1.getEdges()) {
         if (step) {
-          display(gl, [], points);
+          display(gl, getLinesFromTriangles(triangles), displayPoints);
           await highlightAndWait("line11", nextButton);
           if (!step) {
             return []
@@ -398,7 +412,7 @@ async function triangulation(gl: WebGLRenderingContext,
           }
         }
         if (step) {
-          display(gl, [], points);
+          display(gl, getLinesFromTriangles(triangles), displayPoints);
           await highlightAndWait("line12", nextButton);
           if (!step) {
             return []
@@ -407,7 +421,7 @@ async function triangulation(gl: WebGLRenderingContext,
         if (!isContained) {
           polygon.push(triangle1Edge);
           if (step) {
-            display(gl, [], points);
+            display(gl, getLinesFromTriangles(triangles), displayPoints);
             await highlightAndWait("line13", nextButton);
             if (!step) {
               return []
@@ -419,7 +433,7 @@ async function triangulation(gl: WebGLRenderingContext,
 
     for (let triangle of bad) {
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line14", nextButton);
         if (!step) {
           return []
@@ -433,7 +447,7 @@ async function triangulation(gl: WebGLRenderingContext,
         console.log("Unable to remove triangle from array!")
       }
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line15", nextButton);
         if (!step) {
           return []
@@ -442,14 +456,14 @@ async function triangulation(gl: WebGLRenderingContext,
     }
     for (let edge of polygon) {
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line16", nextButton);
         if (!step) {
           return []
         }
       }
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line17", nextButton);
         if (!step) {
           return []
@@ -457,7 +471,7 @@ async function triangulation(gl: WebGLRenderingContext,
       }
       triangles.push(new Triangle(edge[0], edge[1], point));
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line18", nextButton);
         if (!step) {
           return []
@@ -472,14 +486,14 @@ async function triangulation(gl: WebGLRenderingContext,
   while (i < triangles.length) {
     let triangle: Triangle = triangles[i];
     if (step) {
-      display(gl, [], points);
+      display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line19", nextButton);
       if (!step) {
         return []
       }
     }
     if (step) {
-      display(gl, [], points);
+      display(gl, getLinesFromTriangles(triangles), displayPoints);
       await highlightAndWait("line20", nextButton);
       if (!step) {
         return []
@@ -494,7 +508,7 @@ async function triangulation(gl: WebGLRenderingContext,
         console.log("Unable to remove triangle from array!");
       }
       if (step) {
-        display(gl, [], points);
+        display(gl, getLinesFromTriangles(triangles), displayPoints);
         await highlightAndWait("line21", nextButton);
         if (!step) {
           return []
@@ -510,7 +524,7 @@ async function triangulation(gl: WebGLRenderingContext,
   }
 
   if (step) {
-    display(gl, [], points);
+    display(gl, getLinesFromTriangles(triangles), displayPoints);
     await highlightAndWait("line22", nextButton);
     if (!step) {
       return []
