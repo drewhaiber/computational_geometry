@@ -304,18 +304,18 @@ function getLinesFromTriangles(triangleList: Triangle[]): number[] {
   return lines;
 }
 
-async function highlightAndWait(lineNumber: string, button: HTMLElement): Promise<void> {
+async function highlightAndWait(lineNumber: string, button: HTMLElement, timeout: number = 0): Promise<void> {
   let line: HTMLElement = document.getElementById(lineNumber);
   line.style.outline = "solid";
   line.style.outlineWidth = "4px";
   line.style.outlineColor = "#96CDFB";
-  await waitForButtonPress(button);
+  await waitForButtonPress(button, timeout);
 
   line.style.outline = "2px solid transparent";
   line.style.outlineOffset = "2px";
 }
 
-async function waitForButtonPress(button: HTMLElement): Promise<void> {
+async function waitForButtonPress(button: HTMLElement, timeout: number = 0): Promise<void> {
   let stop: (value: unknown) => void;
 
   button.addEventListener("click", function () {
@@ -325,18 +325,46 @@ async function waitForButtonPress(button: HTMLElement): Promise<void> {
   document.addEventListener("cancelStep", function () {
     stop(0);
   });
+  document.addEventListener("playPause", function () {
+    if (timeout == 0) {
+      stop(0);
+    }
+    else {
+      stop(1);
+    }
+  });
 
-  let promise = new Promise((resolve) => {stop = resolve});
-  await promise;
+  let promise = new Promise((resolve) => {
+    if (timeout != 0) {
+      setTimeout(resolve, timeout);
+    }
+    stop = resolve;
+  });
+
+  let badExecution: boolean = false;
+
+  await promise.then((result) => {
+    badExecution = result == 1;
+  });
+
+  if (badExecution) {
+    await waitForButtonPress(button);
+  }
 }
 
 async function triangulation(gl: WebGLRenderingContext,
                              points: number[],
                              step: boolean = false,
-                             nextButton: HTMLElement = new HTMLElement()
+                             play: boolean = false,
+                             nextButton: HTMLElement = new HTMLElement(),
+                             speedSlider: HTMLInputElement = new HTMLInputElement()
                             ): Promise<Triangle[]> {
   document.addEventListener("cancelStep", function () {
     step = false;
+  });
+  document.addEventListener("playPause", function () {
+    play = !play;
+    console.log("PLAYING")
   });
 
   let pointsList: Point[] = [];
@@ -344,7 +372,12 @@ async function triangulation(gl: WebGLRenderingContext,
 
   if (step) {
     display(gl, [], points);
-    await highlightAndWait("line02", nextButton);
+    let timeout = 0;
+    if (play) {
+      timeout = 1700 - speedSlider.valueAsNumber;
+      console.log("value: " + speedSlider.valueAsNumber);
+    }
+    await highlightAndWait("line02", nextButton, timeout);
     if (!step) {
       return [];
     }
@@ -391,7 +424,11 @@ async function triangulation(gl: WebGLRenderingContext,
 
   if (step) {
     display(gl, getLinesFromTriangles(triangles), points);
-    await highlightAndWait("line03", nextButton);
+    let timeout = 0;
+    if (play) {
+      timeout = 1700 - speedSlider.valueAsNumber;
+    }
+    await highlightAndWait("line03", nextButton, timeout);
     if (!step) {
       return [];
     }
@@ -404,7 +441,11 @@ async function triangulation(gl: WebGLRenderingContext,
 
     if (step) {
       display(gl, getLinesFromTriangles(triangles), displayPoints);
-      await highlightAndWait("line04", nextButton);
+      let timeout = 0;
+      if (play) {
+        timeout = 1700 - speedSlider.valueAsNumber;
+      }
+      await highlightAndWait("line04", nextButton, timeout);
       if (!step) {
         return [];
       }
@@ -412,7 +453,11 @@ async function triangulation(gl: WebGLRenderingContext,
     let bad: Triangle[] = [];
     if (step) {
       display(gl, getLinesFromTriangles(triangles), displayPoints);
-      await highlightAndWait("line05", nextButton);
+      let timeout = 0;
+      if (play) {
+        timeout = 1700 - speedSlider.valueAsNumber;
+      }
+      await highlightAndWait("line05", nextButton, timeout);
       if (!step) {
         return [];
       }
@@ -420,7 +465,11 @@ async function triangulation(gl: WebGLRenderingContext,
     for (let triangle of triangles) {
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line06", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line06", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -431,7 +480,11 @@ async function triangulation(gl: WebGLRenderingContext,
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints,
                 triangle.getCircumcenter(), triangle.getCircumradius(), !inCircumscribe);
-        await highlightAndWait("line07", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line07", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -441,7 +494,11 @@ async function triangulation(gl: WebGLRenderingContext,
         bad.push(triangle);
         if (step) {
           display(gl, getLinesFromTriangles(triangles), displayPoints);
-          await highlightAndWait("line08", nextButton);
+          let timeout = 0;
+          if (play) {
+            timeout = 1700 - speedSlider.valueAsNumber;
+          }
+          await highlightAndWait("line08", nextButton, timeout);
           if (!step) {
             return [];
           }
@@ -452,7 +509,11 @@ async function triangulation(gl: WebGLRenderingContext,
     let polygon: Point[][] = [];
     if (step) {
       display(gl, getLinesFromTriangles(triangles), displayPoints);
-      await highlightAndWait("line09", nextButton);
+      let timeout = 0;
+      if (play) {
+        timeout = 1700 - speedSlider.valueAsNumber;
+      }
+      await highlightAndWait("line09", nextButton, timeout);
       if (!step) {
         return [];
       }
@@ -461,7 +522,11 @@ async function triangulation(gl: WebGLRenderingContext,
     for (let triangle1 of bad) {
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line10", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line10", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -469,7 +534,11 @@ async function triangulation(gl: WebGLRenderingContext,
       for (let triangle1Edge of triangle1.getEdges()) {
         if (step) {
           display(gl, getLinesFromTriangles(triangles), displayPoints);
-          await highlightAndWait("line11", nextButton);
+          let timeout = 0;
+          if (play) {
+            timeout = 1700 - speedSlider.valueAsNumber;
+          }
+          await highlightAndWait("line11", nextButton, timeout);
           if (!step) {
             return [];
           }
@@ -482,7 +551,11 @@ async function triangulation(gl: WebGLRenderingContext,
         }
         if (step) {
           display(gl, getLinesFromTriangles(triangles), displayPoints);
-          await highlightAndWait("line12", nextButton);
+          let timeout = 0;
+          if (play) {
+            timeout = 1700 - speedSlider.valueAsNumber;
+          }
+          await highlightAndWait("line12", nextButton, timeout);
           if (!step) {
             return [];
           }
@@ -491,7 +564,11 @@ async function triangulation(gl: WebGLRenderingContext,
           polygon.push(triangle1Edge);
           if (step) {
             display(gl, getLinesFromTriangles(triangles), displayPoints);
-            await highlightAndWait("line13", nextButton);
+            let timeout = 0;
+            if (play) {
+              timeout = 1700 - speedSlider.valueAsNumber;
+            }
+            await highlightAndWait("line13", nextButton, timeout);
             if (!step) {
               return [];
             }
@@ -503,7 +580,11 @@ async function triangulation(gl: WebGLRenderingContext,
     for (let triangle of bad) {
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line14", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line14", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -517,7 +598,11 @@ async function triangulation(gl: WebGLRenderingContext,
       }
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line15", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line15", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -526,14 +611,22 @@ async function triangulation(gl: WebGLRenderingContext,
     for (let edge of polygon) {
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line16", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line16", nextButton, timeout);
         if (!step) {
           return [];
         }
       }
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line17", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line17", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -541,7 +634,11 @@ async function triangulation(gl: WebGLRenderingContext,
       triangles.push(new Triangle(edge[0], edge[1], point));
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line18", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line18", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -556,14 +653,22 @@ async function triangulation(gl: WebGLRenderingContext,
     let triangle: Triangle = triangles[i];
     if (step) {
       display(gl, getLinesFromTriangles(triangles), displayPoints);
-      await highlightAndWait("line19", nextButton);
+      let timeout = 0;
+      if (play) {
+        timeout = 1700 - speedSlider.valueAsNumber;
+      }
+      await highlightAndWait("line19", nextButton, timeout);
       if (!step) {
         return [];
       }
     }
     if (step) {
       display(gl, getLinesFromTriangles(triangles), displayPoints);
-      await highlightAndWait("line20", nextButton);
+      let timeout = 0;
+      if (play) {
+        timeout = 1700 - speedSlider.valueAsNumber;
+      }
+      await highlightAndWait("line20", nextButton, timeout);
       if (!step) {
         return [];
       }
@@ -578,7 +683,11 @@ async function triangulation(gl: WebGLRenderingContext,
       }
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints);
-        await highlightAndWait("line21", nextButton);
+        let timeout = 0;
+        if (play) {
+          timeout = 1700 - speedSlider.valueAsNumber;
+        }
+        await highlightAndWait("line21", nextButton, timeout);
         if (!step) {
           return [];
         }
@@ -594,7 +703,11 @@ async function triangulation(gl: WebGLRenderingContext,
 
   if (step) {
     display(gl, getLinesFromTriangles(triangles), displayPoints);
-    await highlightAndWait("line22", nextButton);
+    let timeout = 0;
+    if (play) {
+      timeout = 1700 - speedSlider.valueAsNumber;
+    }
+    await highlightAndWait("line22", nextButton, timeout);
     if (!step) {
       return [];
     }
@@ -603,14 +716,9 @@ async function triangulation(gl: WebGLRenderingContext,
   display(gl, lines, points)
 }
 
-function showStepButton(step: HTMLElement, next: HTMLElement): void {
-  step.style.display = 'block';
-  next.style.display = 'none';
-}
-
-function showNextButton(step: HTMLElement, next: HTMLElement): void {
-  step.style.display = 'none';
-  next.style.display = 'block';
+function showAndHideButton(show: HTMLElement, hide: HTMLElement): void {
+  show.style.display = 'block';
+  hide.style.display = 'none';
 }
 
 function run(): void {
@@ -631,12 +739,16 @@ function run(): void {
   const stepButton = document.getElementById("step");
   const nextButton = document.getElementById("next");
   const clear = document.getElementById("clear");
+  const playButton = document.getElementById("play");
+  const pauseButton = document.getElementById("pause");
+  const speedSlider = document.getElementById("speedSlider") as HTMLInputElement;
 
-  let stepping = {"isStepping": false};
+  let stepping: boolean = false;
   let cancelStep = new Event("cancelStep");
+  let playPause = new Event("playPause");
 
   canvas.onmousedown = function(event: MouseEvent) {
-    stepping.isStepping = false;
+    stepping = false;
     document.dispatchEvent(cancelStep);
 
     console.log("offsetX:" + event.offsetX);
@@ -656,29 +768,59 @@ function run(): void {
   }
 
   triangulateButton.addEventListener("click", function() {
-    stepping.isStepping = false;
+    stepping = false;
     document.dispatchEvent(cancelStep);
 
-    triangulation(gl, points, false, nextButton);
-    showStepButton(stepButton, nextButton);
+    triangulation(gl, points, false, false, nextButton, speedSlider);
+    showAndHideButton(stepButton, nextButton);
+    showAndHideButton(playButton, pauseButton);
   });
 
   stepButton.addEventListener("click", async function() {
-    stepping.isStepping = true;
+    stepping = true;
 
-    showNextButton(stepButton, nextButton);
-    await triangulation(gl, points, true, nextButton);
-    showStepButton(stepButton, nextButton);
+    showAndHideButton(nextButton, stepButton);
+
+    await triangulation(gl, points, true, false, nextButton, speedSlider);
+
+    showAndHideButton(stepButton, nextButton);
+    showAndHideButton(playButton, pauseButton);
+    stepping = false;
   });
 
   clear.addEventListener("click", function() {
-    stepping.isStepping = false;
+    stepping = false;
     document.dispatchEvent(cancelStep);
 
     lines = [];
     points = [];
     display(gl, lines, points);
-    showStepButton(stepButton, nextButton);
+    showAndHideButton(stepButton, nextButton);
+    showAndHideButton(playButton, pauseButton);
+  });
+
+  playButton.addEventListener("click", async function() {
+    if (stepping) {
+      document.dispatchEvent(playPause);
+
+      showAndHideButton(pauseButton, playButton);
+    }
+    else {
+      stepping = true;
+      showAndHideButton(nextButton, stepButton);
+      showAndHideButton(pauseButton, playButton);
+
+      await triangulation(gl, points, true, true, nextButton, speedSlider);
+
+      showAndHideButton(stepButton, nextButton);
+      showAndHideButton(playButton, pauseButton);
+      stepping = false;
+    }
+  });
+
+  pauseButton.addEventListener("click", function() {
+    showAndHideButton(playButton, pauseButton);
+    document.dispatchEvent(playPause);
   });
 }
 
