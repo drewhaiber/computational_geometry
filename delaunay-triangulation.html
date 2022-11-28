@@ -14,10 +14,9 @@
 
         <title>Delaunay Triangulation</title>
     </head>
-    <body class="flex flex-col my-4 bg-gray-700 md:flex-row">
+    <body class="flex flex-col my-4 bg-gray-700 xl:flex-row">
         <div class="flex flex-col mx-auto">
-            <canvas id="canvas" width="500" height="500" class="w-[500px] h-[500px] mx-4 rounded-lg"></canvas>
-            <!-- ^^^ ALWAYS ENSURE THAT HTML WIDTH AND HEIGHT MATCH CSS WIDTH AND HEIGHT ^^^ -->
+            <canvas id="canvas" class="mx-4 rounded-lg w-[350px] sm:w-[600px] aspect-square"></canvas>
             <div class="flex flex-row mx-auto space-x-4">
                 <button id="triangulate" class="px-2 mx-auto my-4 text-gray-100 rounded-2xl outline outline-gray-100 outline-1 hover:bg-gray-100 hover:text-gray-700">
                     Triangulate
@@ -62,7 +61,7 @@ function BowyerWatson (pointList)
             </code></pre>
         </div> -->
 
-        <div class="mx-auto bg-gray-800 text-gray-100 rounded-lg py-4 px-2 font-mono space-y-0">
+        <div class="px-2 py-4 mx-auto space-y-0 font-mono text-gray-100 bg-gray-800 rounded-lg h-min">
 <span id="line01" class="block px-2 rounded-md"><span class="hljs-keyword">function</span> <span class="hljs-title function_">BowyerWatson</span> (pointList)</span>
 <span id="line02" class="block px-2 rounded-md">&emsp;triangulation := empty triangle mesh data structure</span>
 <span id="line03" class="block px-2 rounded-md">&emsp;add super-triangle to triangulation</span>

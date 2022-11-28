@@ -607,6 +607,9 @@ function run(): void {
     console.log("offsetX:" + event.offsetX);
     console.log("offsetY:" + event.offsetY);
 
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+
     let x = (-canvas.width / 2 + event.offsetX) / (canvas.width / 2);
     let y = (canvas.height / 2 - event.offsetY) / (canvas.height / 2);
 
