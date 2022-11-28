@@ -59,7 +59,7 @@ function pointsToFan(points: number[], desiredEdgePoints: number, radius: number
 }
 
 function display(gl: WebGLRenderingContext, lines: number[], points: number[],
-                 circle_center: Point = null, circle_radius: number = 0):void {
+                 circle_center: Point = null, circle_radius: number = 0, goodCircle: boolean = true):void {
   let vertexShader = createVertexShader(gl, vertShaderFile);
   let fragmentShader = createFragmentShader(gl, fragShaderFile);
 
@@ -79,6 +79,8 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
 
   let circle_lines: number[] = [];
 
+  let circle_fill: number[] = [];
+
   if (circle_center != null) {
     let circle_rast: number = 64;
     if (circle_radius > 64) {
@@ -87,13 +89,17 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
 
     let stepSize = ((2 * Math.PI) / circle_rast);
     for (let d = 0.0; d <= (2 * Math.PI); d += stepSize) {
-      circle_lines.push((Math.sin(d) * circle_radius + circle_center.x),
-                        (Math.cos(d) * circle_radius + circle_center.y),
-                        (Math.sin(d + stepSize) * circle_radius + circle_center.x),
-                        (Math.cos(d + stepSize) * circle_radius + circle_center.y));
+      let e1: number = Math.sin(d) * circle_radius + circle_center.x;
+      let e2: number = Math.cos(d) * circle_radius + circle_center.y;
+      let e3: number = Math.sin(d + stepSize) * circle_radius + circle_center.x;
+      let e4: number = Math.cos(d + stepSize) * circle_radius + circle_center.y;
+      circle_lines.push(e1, e2, e3, e4);
+
+      circle_fill.push(circle_center.x, circle_center.y, e1, e2, e3, e4);
     }
 
-    buffer = buffer.concat(circle_lines)
+    buffer = buffer.concat(circle_lines);
+    buffer = buffer.concat(circle_fill);
   }
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(buffer), gl.STATIC_DRAW);
@@ -116,6 +122,41 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
   let offset: number = 0;
   gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
 
+  // Draw the circle if it exists
+  if (circle_center != null) {
+    if (goodCircle) {
+      gl.uniform4f(colorUniformLocation, 0.651, 0.890, 0.631, 0.33);
+    }
+    else {
+      gl.uniform4f(colorUniformLocation, 0.980, 0.702, 0.529, 0.33);
+    }
+    
+    gl.uniform1i(pointUniformLocation, 1);
+
+    let primativeType = gl.TRIANGLES;
+    offset = (lines.length / 2) + (points.length / 2) + (circle_lines.length / 2);
+
+    let count = circle_fill.length / 2;
+    console.log(count);
+    gl.drawArrays(primativeType, offset, count);
+
+    if (goodCircle) {
+      gl.uniform4f(colorUniformLocation, 0.651, 0.890, 0.631, 1);
+    }
+    else {
+      gl.uniform4f(colorUniformLocation, 0.980, 0.702, 0.529, 1);
+    }
+    gl.uniform1i(pointUniformLocation, 1);
+
+    primativeType = gl.LINES;
+    offset = (lines.length / 2) + (points.length / 2);
+
+    count = circle_lines.length / 2;
+    console.log(count);
+    gl.drawArrays(primativeType, offset, count);
+  }
+
+
   // Draw lines
   gl.uniform4f(colorUniformLocation, 0.537, 0.706, 0.980, 1);
   gl.uniform1i(pointUniformLocation, 1);
@@ -126,16 +167,7 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
   console.log(count);
   gl.drawArrays(primativeType, offset, count);
 
-  // Draw the circle if it exists
-  gl.uniform4f(colorUniformLocation, 0.651, 0.890, 0.631, 1);
-  gl.uniform1i(pointUniformLocation, 1);
-
-  primativeType = gl.LINES;
-  offset = (lines.length / 2) + (points.length / 2);
-
-  count = circle_lines.length / 2;
-  console.log(count);
-  gl.drawArrays(primativeType, offset, count);
+  
 
   // Draw the points
   gl.uniform4f(colorUniformLocation, 0.953, 0.545, 0.659, 1);
@@ -393,15 +425,18 @@ async function triangulation(gl: WebGLRenderingContext,
           return [];
         }
       }
+
+      let inCircumscribe: boolean = triangle.inCircumscribe(point)
+
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints,
-                triangle.getCircumcenter(), triangle.getCircumradius());
+                triangle.getCircumcenter(), triangle.getCircumradius(), !inCircumscribe);
         await highlightAndWait("line07", nextButton);
         if (!step) {
           return [];
         }
       }
-      if (triangle.inCircumscribe(point)) {
+      if (inCircumscribe) {
         
         bad.push(triangle);
         if (step) {
@@ -581,7 +616,7 @@ function showNextButton(step: HTMLElement, next: HTMLElement): void {
 function run(): void {
   const canvas = document.querySelector("canvas");
 
-  const gl = canvas.getContext("webgl");
+  const gl = canvas.getContext("webgl", {premultipliedAlpha: false});
 
   if (!gl) {
     // TODO: add something displaying error to user.
