@@ -58,7 +58,8 @@ function pointsToFan(points: number[], desiredEdgePoints: number, radius: number
   return fans;
 }
 
-function display(gl: WebGLRenderingContext, lines: number[], points: number[]):void {
+function display(gl: WebGLRenderingContext, lines: number[], points: number[],
+                 circle_center: Point = null, circle_radius: number = 0):void {
   let vertexShader = createVertexShader(gl, vertShaderFile);
   let fragmentShader = createFragmentShader(gl, fragShaderFile);
 
@@ -75,6 +76,25 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[]):v
   points = pointsToFan(points, 12, 0.02);
 
   let buffer = lines.concat(points)
+
+  let circle_lines: number[] = [];
+
+  if (circle_center != null) {
+    let circle_rast: number = 64;
+    if (circle_radius > 64) {
+      circle_rast = circle_radius * Math.PI / 8;
+    }
+
+    let stepSize = ((2 * Math.PI) / circle_rast);
+    for (let d = 0.0; d <= (2 * Math.PI); d += stepSize) {
+      circle_lines.push((Math.sin(d) * circle_radius + circle_center.x),
+                        (Math.cos(d) * circle_radius + circle_center.y),
+                        (Math.sin(d + stepSize) * circle_radius + circle_center.x),
+                        (Math.cos(d + stepSize) * circle_radius + circle_center.y));
+    }
+
+    buffer = buffer.concat(circle_lines)
+  }
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(buffer), gl.STATIC_DRAW);
 
@@ -96,6 +116,7 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[]):v
   let offset: number = 0;
   gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
 
+  // Draw lines
   gl.uniform4f(colorUniformLocation, 0.537, 0.706, 0.980, 1);
   gl.uniform1i(pointUniformLocation, 1);
 
@@ -105,6 +126,18 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[]):v
   console.log(count);
   gl.drawArrays(primativeType, offset, count);
 
+  // Draw the circle if it exists
+  gl.uniform4f(colorUniformLocation, 0.651, 0.890, 0.631, 1);
+  gl.uniform1i(pointUniformLocation, 1);
+
+  primativeType = gl.LINES;
+  offset = (lines.length / 2) + (points.length / 2);
+
+  count = circle_lines.length / 2;
+  console.log(count);
+  gl.drawArrays(primativeType, offset, count);
+
+  // Draw the points
   gl.uniform4f(colorUniformLocation, 0.953, 0.545, 0.659, 1);
   gl.uniform1i(pointUniformLocation, 1);
 
@@ -241,9 +274,9 @@ function getLinesFromTriangles(triangleList: Triangle[]): number[] {
 
 async function highlightAndWait(lineNumber: string, button: HTMLElement): Promise<void> {
   let line: HTMLElement = document.getElementById(lineNumber);
-  line.style.outline = "solid"
-  line.style.outlineWidth = "4px"
-  line.style.outlineColor = "#96CDFB"
+  line.style.outline = "solid";
+  line.style.outlineWidth = "4px";
+  line.style.outlineColor = "#96CDFB";
   await waitForButtonPress(button);
 
   line.style.outline = "2px solid transparent";
@@ -361,7 +394,8 @@ async function triangulation(gl: WebGLRenderingContext,
         }
       }
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        display(gl, getLinesFromTriangles(triangles), displayPoints,
+                triangle.getCircumcenter(), triangle.getCircumradius());
         await highlightAndWait("line07", nextButton);
         if (!step) {
           return [];
