@@ -58,8 +58,45 @@ function pointsToFan(points: number[], desiredEdgePoints: number, radius: number
   return fans;
 }
 
-function display(gl: WebGLRenderingContext, lines: number[], points: number[],
-                 circle_center: Point = null, circle_radius: number = 0, goodCircle: boolean = true):void {
+class BufferInfo {
+  public type: number;
+  public offset: number;
+  public count: number;
+
+  public red: number;
+  public green: number;
+  public blue: number;
+  public alpha: number;
+
+  constructor(type: number, offset: number, count: number,
+              red: number, green: number, blue: number, alpha: number) {
+    this.type = type;
+    this.offset = offset;
+    this.count = count;
+
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
+    this.alpha = alpha;
+  }
+}
+
+function display(gl: WebGLRenderingContext,
+                 lines: number[],
+                 points: number[],
+
+                 highlightedTriangle: Triangle = null,
+                 highlightedLine: Point[] = [],
+                 highlightedPoint: Point = null,
+
+                 badTriangles: Triangle[] = [],
+                 polygon: Point[][] = [],
+
+                 circle_center: Point = null,
+                 circle_radius: number = 0,
+                 goodCircle: boolean = true
+                ):void {
+  // Setup shaders and basic program
   let vertexShader = createVertexShader(gl, vertShaderFile);
   let fragmentShader = createFragmentShader(gl, fragShaderFile);
 
@@ -69,22 +106,40 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
   let colorUniformLocation = gl.getUniformLocation(program, "vColor");
   let pointUniformLocation = gl.getUniformLocation(program, "point");
 
+  // Create buffer
   let positionBuffer = gl.createBuffer();
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-  points = pointsToFan(points, 12, 0.02);
+  let buffer = []
+  let bufferInfo: BufferInfo[] = [];
+  let nextOffset: number = 0;
 
-  let buffer = lines.concat(points)
+  // Add Bad Triangles to Buffer
+  if (badTriangles.length != 0) {
+    let btBuffer: number[] = [];
+    for (let triangle of badTriangles) {
+      btBuffer.push(triangle.p1.x, triangle.p1.y,
+                    triangle.p2.x, triangle.p2.y,
+                    triangle.p3.x, triangle.p3.y);
+    }
+    buffer = buffer.concat(btBuffer);
+    bufferInfo.push(new BufferInfo(gl.TRIANGLES,
+                                  nextOffset,
+                                  btBuffer.length / 2,
+                                  0.796, 0.651, 0.969, 0.10));
+    nextOffset += btBuffer.length / 2;
+  }
 
+  // Circle Buffer
   let circle_lines: number[] = [];
 
   let circle_fill: number[] = [];
 
   if (circle_center != null) {
     let circle_rast: number = 64;
-    if (circle_radius > 64) {
-      circle_rast = circle_radius * Math.PI / 8;
+    if (circle_radius > 1024) {
+      circle_rast = circle_radius * Math.PI / 64;
     }
 
     let stepSize = ((2 * Math.PI) / circle_rast);
@@ -98,14 +153,106 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
       circle_fill.push(circle_center.x, circle_center.y, e1, e2, e3, e4);
     }
 
-    buffer = buffer.concat(circle_lines);
     buffer = buffer.concat(circle_fill);
+    buffer = buffer.concat(circle_lines);
+    if (goodCircle) {
+      bufferInfo.push(new BufferInfo(gl.TRIANGLES,
+                                     nextOffset,
+                                     circle_fill.length / 2,
+                                     0.651, 0.890, 0.631, 0.33));
+      bufferInfo.push(new BufferInfo(gl.LINES,
+                                     nextOffset + circle_fill.length / 2,
+                                     circle_lines.length / 2,
+                                     0.651, 0.890, 0.631, 1));
+    }
+    else {
+      bufferInfo.push(new BufferInfo(gl.TRIANGLES,
+                                     nextOffset,
+                                     circle_fill.length / 2,
+                                     0.980, 0.702, 0.529, 0.33));
+      bufferInfo.push(new BufferInfo(gl.LINES,
+                                     nextOffset + circle_fill.length / 2,
+                                     circle_lines.length / 2,
+                                     0.980, 0.702, 0.529, 1));
+    }
+    nextOffset += (circle_lines.length / 2) + (circle_fill.length / 2);
   }
 
+  // Lines Buffer
+  buffer = buffer.concat(lines);
+  bufferInfo.push(new BufferInfo(gl.LINES,
+                                 nextOffset,
+                                 lines.length / 2,
+                                 0.537, 0.706, 0.980, 1));
+  nextOffset += lines.length / 2;
+  
+  // Highlight Triangle Buffer
+  if (highlightedTriangle != null) {
+    console.log("TRIANGLE");
+    let htBuffer = getLinesFromTriangles([highlightedTriangle]);
+    buffer = buffer.concat(htBuffer);
+    bufferInfo.push(new BufferInfo(gl.LINES,
+                                  nextOffset,
+                                  htBuffer.length / 2,
+                                  0.976, 0.886, 0.686, 1));
+    nextOffset += htBuffer.length / 2;
+  }
+
+  // Polygon Buffer
+  if (polygon.length != 0) {
+    let pgBuffer: number[] = [];
+    for (let edge of polygon) {
+      pgBuffer.push(edge[0].x, edge[0].y,
+                    edge[1].x, edge[1].y);
+    }
+    buffer = buffer.concat(pgBuffer);
+    bufferInfo.push(new BufferInfo(gl.LINES,
+                                  nextOffset,
+                                  pgBuffer.length / 2,
+                                  0, 1, 0, 1));
+                                  //0.922, 0.627, 0.675, 1));
+    nextOffset += pgBuffer.length / 2;
+  }
+  
+  // Highlight Line Buffer
+  if (highlightedLine.length != 0) {
+    let hlBuffer: number[] = [];
+    hlBuffer.push(highlightedLine[0].x, highlightedLine[0].y,
+                  highlightedLine[1].x, highlightedLine[1].y);
+    buffer = buffer.concat(hlBuffer);
+    bufferInfo.push(new BufferInfo(gl.LINES,
+                                   nextOffset,
+                                   hlBuffer.length / 2,
+                                   1, 0, 0, 1)); // TODO: Find a better color
+    nextOffset += hlBuffer.length / 2;
+  }
+
+  // Points Buffer
+  let pointsBuffer = pointsToFan(points, 12, 0.02);
+  buffer = buffer.concat(pointsBuffer);
+  bufferInfo.push(new BufferInfo(gl.TRIANGLES,
+                                 nextOffset,
+                                 pointsBuffer.length / 2,
+                                 0.953, 0.545, 0.659, 1));
+  nextOffset += pointsBuffer.length / 2;
+
+  // Highlight Point Buffer
+  if (highlightedPoint != null) {
+    let hpBuffer: number[] = pointsToFan([highlightedPoint.x, highlightedPoint.y], 12, 0.02);
+    buffer = buffer.concat(hpBuffer);
+    bufferInfo.push(new BufferInfo(gl.TRIANGLES,
+                                   nextOffset,
+                                   hpBuffer.length / 2,
+                                   0.706, 0.745, 0.996, 1));
+    nextOffset += hpBuffer.length / 2;
+  }
+  
+  // Buffer Stuff
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(buffer), gl.STATIC_DRAW);
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
+  // Clear the canvas
   gl.clearColor(0.094, 0.094, 0.145, 1);  // Catppuccin Mocha Mantle
   gl.clear(gl.COLOR_BUFFER_BIT)
 
@@ -113,6 +260,7 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
 
   gl.enableVertexAttribArray(positionAttributeLocation);
 
+  // More Buffer Stuff
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
   let size: number = 2;  // 2 elements per point
@@ -122,61 +270,14 @@ function display(gl: WebGLRenderingContext, lines: number[], points: number[],
   let offset: number = 0;
   gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
 
-  // Draw the circle if it exists
-  if (circle_center != null) {
-    if (goodCircle) {
-      gl.uniform4f(colorUniformLocation, 0.651, 0.890, 0.631, 0.33);
-    }
-    else {
-      gl.uniform4f(colorUniformLocation, 0.980, 0.702, 0.529, 0.33);
-    }
-    
-    gl.uniform1i(pointUniformLocation, 1);
+  // I forgot why this exists honestly
+  gl.uniform1i(pointUniformLocation, 1);
 
-    let primativeType = gl.TRIANGLES;
-    offset = (lines.length / 2) + (points.length / 2) + (circle_lines.length / 2);
-
-    let count = circle_fill.length / 2;
-    console.log(count);
-    gl.drawArrays(primativeType, offset, count);
-
-    if (goodCircle) {
-      gl.uniform4f(colorUniformLocation, 0.651, 0.890, 0.631, 1);
-    }
-    else {
-      gl.uniform4f(colorUniformLocation, 0.980, 0.702, 0.529, 1);
-    }
-    gl.uniform1i(pointUniformLocation, 1);
-
-    primativeType = gl.LINES;
-    offset = (lines.length / 2) + (points.length / 2);
-
-    count = circle_lines.length / 2;
-    console.log(count);
-    gl.drawArrays(primativeType, offset, count);
+  // Draw everything
+  for (let info of bufferInfo) {
+    gl.uniform4f(colorUniformLocation, info.red, info.green, info.blue, info.alpha);
+    gl.drawArrays(info.type, info.offset, info.count);
   }
-
-
-  // Draw lines
-  gl.uniform4f(colorUniformLocation, 0.537, 0.706, 0.980, 1);
-  gl.uniform1i(pointUniformLocation, 1);
-
-  let primativeType = gl.LINES;
-  offset = 0;
-  let count = lines.length / 2;
-  console.log(count);
-  gl.drawArrays(primativeType, offset, count);
-
-  
-
-  // Draw the points
-  gl.uniform4f(colorUniformLocation, 0.953, 0.545, 0.659, 1);
-  gl.uniform1i(pointUniformLocation, 1);
-
-  primativeType = gl.TRIANGLES;
-  offset = lines.length / 2;
-  count = points.length / 2;
-  gl.drawArrays(primativeType, offset, count);
 }
 
 class Point {
@@ -187,7 +288,7 @@ class Point {
   constructor(x: number, y: number, z: number) {
     this.x = x;
     this.y = y;
-	this.z = z;
+	  this.z = z;
   }
 
   public cmult(c: number): Point {
@@ -440,7 +541,7 @@ async function triangulation(gl: WebGLRenderingContext,
     displayPoints.push(point.x, point.y);
 
     if (step) {
-      display(gl, getLinesFromTriangles(triangles), displayPoints);
+      display(gl, getLinesFromTriangles(triangles), displayPoints, null, [], point);
       let timeout = 0;
       if (play) {
         timeout = 1700 - speedSlider.valueAsNumber;
@@ -452,7 +553,7 @@ async function triangulation(gl: WebGLRenderingContext,
     }
     let bad: Triangle[] = [];
     if (step) {
-      display(gl, getLinesFromTriangles(triangles), displayPoints);
+      display(gl, getLinesFromTriangles(triangles), displayPoints, null, [], point);
       let timeout = 0;
       if (play) {
         timeout = 1700 - speedSlider.valueAsNumber;
@@ -464,7 +565,7 @@ async function triangulation(gl: WebGLRenderingContext,
     }
     for (let triangle of triangles) {
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        display(gl, getLinesFromTriangles(triangles), displayPoints, triangle, [], point, bad);
         let timeout = 0;
         if (play) {
           timeout = 1700 - speedSlider.valueAsNumber;
@@ -479,6 +580,8 @@ async function triangulation(gl: WebGLRenderingContext,
 
       if (step) {
         display(gl, getLinesFromTriangles(triangles), displayPoints,
+                triangle, [], point,
+                bad, [],
                 triangle.getCircumcenter(), triangle.getCircumradius(), !inCircumscribe);
         let timeout = 0;
         if (play) {
@@ -493,7 +596,7 @@ async function triangulation(gl: WebGLRenderingContext,
         
         bad.push(triangle);
         if (step) {
-          display(gl, getLinesFromTriangles(triangles), displayPoints);
+          display(gl, getLinesFromTriangles(triangles), displayPoints, triangle, [], point, bad);
           let timeout = 0;
           if (play) {
             timeout = 1700 - speedSlider.valueAsNumber;
@@ -508,7 +611,7 @@ async function triangulation(gl: WebGLRenderingContext,
 
     let polygon: Point[][] = [];
     if (step) {
-      display(gl, getLinesFromTriangles(triangles), displayPoints);
+      display(gl, getLinesFromTriangles(triangles), displayPoints, null, [], point, bad, polygon);
       let timeout = 0;
       if (play) {
         timeout = 1700 - speedSlider.valueAsNumber;
@@ -521,7 +624,7 @@ async function triangulation(gl: WebGLRenderingContext,
 
     for (let triangle1 of bad) {
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        display(gl, getLinesFromTriangles(triangles), displayPoints, triangle1, [], point, bad, polygon);
         let timeout = 0;
         if (play) {
           timeout = 1700 - speedSlider.valueAsNumber;
@@ -533,7 +636,7 @@ async function triangulation(gl: WebGLRenderingContext,
       }
       for (let triangle1Edge of triangle1.getEdges()) {
         if (step) {
-          display(gl, getLinesFromTriangles(triangles), displayPoints);
+          display(gl, getLinesFromTriangles(triangles), displayPoints, triangle1, triangle1Edge, point, bad, polygon);
           let timeout = 0;
           if (play) {
             timeout = 1700 - speedSlider.valueAsNumber;
@@ -550,7 +653,7 @@ async function triangulation(gl: WebGLRenderingContext,
           }
         }
         if (step) {
-          display(gl, getLinesFromTriangles(triangles), displayPoints);
+          display(gl, getLinesFromTriangles(triangles), displayPoints, triangle1, triangle1Edge, point, bad, polygon);
           let timeout = 0;
           if (play) {
             timeout = 1700 - speedSlider.valueAsNumber;
@@ -563,7 +666,7 @@ async function triangulation(gl: WebGLRenderingContext,
         if (!isContained) {
           polygon.push(triangle1Edge);
           if (step) {
-            display(gl, getLinesFromTriangles(triangles), displayPoints);
+            display(gl, getLinesFromTriangles(triangles), displayPoints, triangle1, [], point, bad, polygon);
             let timeout = 0;
             if (play) {
               timeout = 1700 - speedSlider.valueAsNumber;
@@ -576,10 +679,10 @@ async function triangulation(gl: WebGLRenderingContext,
         }
       }
     }
-
+    let badDisplay: Triangle[] = bad.concat();
     for (let triangle of bad) {
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        display(gl, getLinesFromTriangles(triangles), displayPoints, triangle, [], point, badDisplay, polygon);
         let timeout = 0;
         if (play) {
           timeout = 1700 - speedSlider.valueAsNumber;
@@ -597,7 +700,16 @@ async function triangulation(gl: WebGLRenderingContext,
         console.log("Unable to remove triangle from array!")
       }
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        const index: number = getTriangleIndex(badDisplay, triangle);
+
+        if (index > -1) {
+          badDisplay.splice(index, 1);
+        } 
+        else {
+          console.log("Unable to remove triangle from array!")
+        }
+
+        display(gl, getLinesFromTriangles(triangles), displayPoints, null, [], point, badDisplay, polygon);
         let timeout = 0;
         if (play) {
           timeout = 1700 - speedSlider.valueAsNumber;
@@ -608,9 +720,10 @@ async function triangulation(gl: WebGLRenderingContext,
         }
       }
     }
+
     for (let edge of polygon) {
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        display(gl, getLinesFromTriangles(triangles), displayPoints, null, edge, point, [], polygon);
         let timeout = 0;
         if (play) {
           timeout = 1700 - speedSlider.valueAsNumber;
@@ -620,8 +733,11 @@ async function triangulation(gl: WebGLRenderingContext,
           return [];
         }
       }
+
+      let newTriangle = new Triangle(edge[0], edge[1], point);
+
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        display(gl, getLinesFromTriangles(triangles), displayPoints, newTriangle, edge, point, [], polygon);
         let timeout = 0;
         if (play) {
           timeout = 1700 - speedSlider.valueAsNumber;
@@ -631,9 +747,9 @@ async function triangulation(gl: WebGLRenderingContext,
           return [];
         }
       }
-      triangles.push(new Triangle(edge[0], edge[1], point));
+      triangles.push(newTriangle);
       if (step) {
-        display(gl, getLinesFromTriangles(triangles), displayPoints);
+        display(gl, getLinesFromTriangles(triangles), displayPoints, null, [], point, [], polygon);
         let timeout = 0;
         if (play) {
           timeout = 1700 - speedSlider.valueAsNumber;
@@ -652,7 +768,7 @@ async function triangulation(gl: WebGLRenderingContext,
   while (i < triangles.length) {
     let triangle: Triangle = triangles[i];
     if (step) {
-      display(gl, getLinesFromTriangles(triangles), displayPoints);
+      display(gl, getLinesFromTriangles(triangles), displayPoints, triangle);
       let timeout = 0;
       if (play) {
         timeout = 1700 - speedSlider.valueAsNumber;
@@ -663,7 +779,7 @@ async function triangulation(gl: WebGLRenderingContext,
       }
     }
     if (step) {
-      display(gl, getLinesFromTriangles(triangles), displayPoints);
+      display(gl, getLinesFromTriangles(triangles), displayPoints, triangle);
       let timeout = 0;
       if (play) {
         timeout = 1700 - speedSlider.valueAsNumber;
