@@ -102,7 +102,15 @@ function BowyerWatson (pointList)
 <span id="line21" class="block px-2 rounded-md">&emsp;&emsp;&emsp;remove triangle <span class="hljs-keyword">from</span> triangulation</span>
 <span id="line22" class="block px-2 rounded-md">&emsp;<span class="hljs-keyword">return</span> triangulation</span>
         </div>
-
+		<div class="px-2 py-4 mx-auto space-y-0 font-mono text-gray-100 bg-gray-800 rounded-lg h-min">
+			<p> 
+				Delaunay Triangulation refers to the process of finidng triangles that connect a set of points, with the restriction being that no point is inside another triangle's circumcircle (the circumcircle of a triangle refers to the circle that contains the endpoints of the triangle in its circumference). This tends to produce triangulations that avoids having triangles with small angles.</p>
+				
+			<p> The Bowyer Watson method is an iterative algorithm for calculating Delaunay Triangulations. It starts by creating a single large triangle around all of the points as the startpoint of its triangulation. Then, it adds each point to the triangulation, one at a time. If it sees that a point is inside the circumcircle of a triangle that's in the triangulation, that triangle is removed, </p
+			<p>
+				For more information, check out the <a style="color: #96CDFB; text-decoration:underline", href="https://en.wikipedia.org/wiki/Bowyer-Watson_algorithm">Bowyer Watson algorithm</a> and <a style="color: #96CDFB; text-decoration:underline", href="https://en.wikipedia.org/wiki/Delaunay_triangulation"> Delaunay Triangulation </a>
+			</p>
+		</div>
         
 
     </body>
