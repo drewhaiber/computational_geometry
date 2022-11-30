@@ -127,7 +127,8 @@ function display(gl: WebGLRenderingContext,
     bufferInfo.push(new BufferInfo(gl.TRIANGLES,
                                   nextOffset,
                                   btBuffer.length / 2,
-                                  0.796, 0.651, 0.969, 0.10));
+                                  //0.796, 0.651, 0.969, 0.15));
+                                  0.980, 0.702, 0.529, 0.1));
     nextOffset += btBuffer.length / 2;
   }
 
@@ -209,7 +210,7 @@ function display(gl: WebGLRenderingContext,
     bufferInfo.push(new BufferInfo(gl.LINES,
                                   nextOffset,
                                   pgBuffer.length / 2,
-                                  0, 1, 0, 1));
+                                  0.651, 0.890, 0.631, 1));
                                   //0.922, 0.627, 0.675, 1));
     nextOffset += pgBuffer.length / 2;
   }
@@ -223,7 +224,7 @@ function display(gl: WebGLRenderingContext,
     bufferInfo.push(new BufferInfo(gl.LINES,
                                    nextOffset,
                                    hlBuffer.length / 2,
-                                   1, 0, 0, 1)); // TODO: Find a better color
+                                   0.953, 0.545, 0.659, 1)); // TODO: Find a better color
     nextOffset += hlBuffer.length / 2;
   }
 
@@ -243,7 +244,7 @@ function display(gl: WebGLRenderingContext,
     bufferInfo.push(new BufferInfo(gl.TRIANGLES,
                                    nextOffset,
                                    hpBuffer.length / 2,
-                                   0.706, 0.745, 0.996, 1));
+                                   0.976, 0.886, 0.686, 1));
     nextOffset += hpBuffer.length / 2;
   }
   
