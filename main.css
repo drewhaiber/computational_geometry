@@ -555,14 +555,14 @@ video {
   margin: auto;
 }
 
-.my-4 {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
+}
+
+.my-4 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .mx-4 {
@@ -628,6 +628,10 @@ video {
   width: 8rem;
 }
 
+.max-w-2xl {
+  max-width: 42rem;
+}
+
 .flex-row {
   flex-direction: row;
 }
@@ -682,9 +686,9 @@ video {
   fill: currentColor;
 }
 
-.px-2 {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .py-4 {
@@ -692,8 +696,23 @@ video {
   padding-bottom: 1rem;
 }
 
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
 .font-mono {
   font-family: Inconsolata;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-blue {
+  --tw-text-opacity: 1;
+  color: rgb(150 205 251 / var(--tw-text-opacity));
 }
 
 .text-gray-100 {
